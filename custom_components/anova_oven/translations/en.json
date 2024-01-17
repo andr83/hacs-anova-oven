@@ -1,0 +1,134 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "app_key": "App key",
+                    "access_token": "Access token",
+                    "refresh_token": "Refresh token"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "target_temperature": {
+                "name": "Target temperature"
+            },
+            "temperature": {
+                "name": "Temperature"
+            },
+            "mode": {
+                "name": "Mode"
+            },
+            "bulb_mode": {
+                "name": "Bulb mode"
+            },
+            "rear_watts": {
+                "name": "Rear watts"
+            },
+            "bottom_watts": {
+                "name": "Bottom watts"
+            },
+            "top_watts": {
+                "name": "Top watts"
+            },
+            "fan_speed": {
+                "name": "Fan speed"
+            },
+            "relative_humidity": {
+                "name": "Humidity"
+            },
+            "target_humidity": {
+                "name": "Target humidity"
+            },
+            "steam_generator_mode": {
+                "name": "Steam generator mode"
+            },
+            "cook_time": {
+                "name": "Cook time"
+            },
+            "timer": {
+                "name": "Timer"
+            },
+            "timer_initial": {
+                "name": "Timer initial"
+            },
+            "timer_mode": {
+                "name": "Timer mode"
+            }
+        },
+        "binary_sensor": {
+            "souse_vide": {
+                "name": "Souse vide"
+            },
+            "lamp_on": {
+                "name": "Lamp on"
+            },
+            "door_closed": {
+                "name": "Door closed"
+            },
+            "water_tank_empty": {
+                "name": "Water tank empty"
+            }
+        }
+    },
+    "services": {
+        "start_cook": {
+          "name": "Start cooking",
+          "description": "Configure cooking and start it.",
+          "fields": {
+            "device_id": {
+              "name": "Device ID",
+              "description": "Id of the device."
+            },
+            "souse_vide": {
+              "name": "Souse vide",
+              "description": "Enable low temperature cooking mode."
+            },
+            "target_temperature": {
+              "name": "Temperature",
+              "description": "Target temperature. For souce vide mode it limits to 100°C"
+            },
+            "heating_top": {
+              "name": "Heat top",
+              "description": "Enable top section heating."
+            },
+            "heating_bottom": {
+              "name": "Heat bottom",
+              "description": "Enable bottom section heating."
+            },
+            "heating_rear": {
+              "name": "Heat rear",
+              "description": "Enable rear section heating."
+            },
+            "temperature_probe": {
+              "name": "Probe",
+              "description": "Probe temperature. Can not be used togerther with the timer."
+            },
+            "timer": {
+              "name": "Timer",
+              "description": "Cooking timer. Can not be used togerther with the probe."
+            }
+          }
+        },
+        "stop_cook": {
+          "name": "Stop cooking",
+          "description": "Stop cooking all stages.",
+          "fields": {
+            "device_id": {
+              "name": "Device ID",
+              "description": "Id of the device."
+            }
+          }
+        }
+      }
+}

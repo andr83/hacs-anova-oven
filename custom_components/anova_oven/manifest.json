@@ -1,0 +1,15 @@
+{
+  "domain": "anova_oven",
+  "name": "Anova Precision Oven",
+  "codeowners": [
+    "@andr83"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/anova_oven",
+  "homekit": {},
+  "iot_class": "cloud_push",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": []
+}

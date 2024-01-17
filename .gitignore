@@ -9,6 +9,7 @@ __pycache__
 # misc
 .coverage
 .vscode
+.DS_Store
 coverage.xml
 
 

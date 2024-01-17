@@ -1,7 +1,7 @@
 {
-    "name": "Integration blueprint",
-    "filename": "integration_blueprint.zip",
-    "hide_default_branch": true,
+    "name": "Anova Oven",
+    "filename": "anova_oven.zip",
+    "hide_default_branch": false,
     "homeassistant": "2023.8.0",
     "render_readme": true,
     "zip_release": true

@@ -1,0 +1,52 @@
+start_cook:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: anova_oven
+    souse_vide:
+      required: true
+      default: false
+      selector:
+        boolean:
+    target_temperature:
+      required: true
+      selector:
+        number:
+          min: 20
+          max: 250
+          unit_of_measurement: "°C"
+          mode: slider
+    heating_top:
+      default: false
+      selector:
+        boolean:
+    heating_bottom:
+      default: false
+      selector:
+        boolean:
+    heating_rear:
+      default: true
+      selector:
+        boolean:
+    temperature_probe:
+      required: false
+      selector:
+        number:
+          min: 20
+          max: 250
+          unit_of_measurement: "°C"
+          mode: slider
+    timer:
+      required: false
+      selector:
+        duration:
+
+stop_cook:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: anova_oven
