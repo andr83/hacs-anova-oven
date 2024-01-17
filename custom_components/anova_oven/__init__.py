@@ -1,6 +1,5 @@
 """The Anova Precision Oven integration."""
 from __future__ import annotations
-from homeassistant.components.anova_oven.util import to_fahrenheit
 
 from homeassistant.const import ATTR_DEVICE_ID, CONF_ACCESS_TOKEN, CONF_DEVICES
 from homeassistant.config_entries import ConfigEntry
@@ -15,6 +14,7 @@ import uuid
 import dataclasses
 
 from .const import DOMAIN, CONF_APP_KEY, CONF_REFRESH_TOKEN, PLATFORM
+from .util import to_fahrenheit
 from .api import AnovaOvenApi
 from .coordinator import AnovaCoordinator
 from .precision_oven import AnovaPrecisionOven, APOCommand, APOStage
