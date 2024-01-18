@@ -5,7 +5,7 @@ start_cook:
       selector:
         device:
           integration: anova_oven
-    souse_vide:
+    sous_vide:
       required: true
       default: false
       selector:

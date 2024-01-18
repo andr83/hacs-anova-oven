@@ -85,7 +85,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         probe = call.data.get("temperature_probe")
         if timer and probe:
             raise ValueError("Only probe or timer can be setup at one.")
-        if call.data["souse_vide"] and call.data["target_temperature"] > 100:
+        if call.data["sous_vide"] and call.data["target_temperature"] > 100:
             raise ValueError(
                 "Target temprature could not exceed 100°C in souse vide mode."
             )
@@ -103,7 +103,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         fahrenheit=to_fahrenheit(call.data["target_temperature"]),
                     )
                 )
-                if not call.data["souse_vide"]
+                if not call.data["sous_vide"]
                 else None,
                 wet=APOStage.TemperatureBulb(
                     setpoint=APOStage.TemperatureSetpoint(
@@ -111,9 +111,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         fahrenheit=to_fahrenheit(call.data["target_temperature"]),
                     )
                 )
-                if call.data["souse_vide"]
+                if call.data["sous_vide"]
                 else None,
-                mode="wet" if call.data["souse_vide"] else "dry",
+                mode="wet" if call.data["sous_vide"] else "dry",
             ),
             heating_elements=APOStage.HeatingElements(
                 bottom=APOStage.On(on=call.data.get("heating_bottom", False)),

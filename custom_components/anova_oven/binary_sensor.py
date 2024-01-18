@@ -46,8 +46,8 @@ class AnovaOvenBinarySensorEntityDescription(
 
 SENSOR_DESCRIPTIONS: list[SensorEntityDescription] = [
     AnovaOvenBinarySensorEntityDescription(
-        key="souse_vide",
-        translation_key="souse_vide",
+        key="sous_vide",
+        translation_key="sous_vide",
         format_type=FormatType.OnOff,
         value_fn=lambda data: data.sensor.nodes.temperature_bulbs.mode == 'wet',
     ),
