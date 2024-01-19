@@ -1,21 +1,17 @@
 """Support for Anova Coordinators."""
-from asyncio import timeout, Task, create_task, sleep
-from datetime import timedelta
+from asyncio import Task, sleep
 import logging
-import typing
 
 from homeassistant.helpers import device_registry
 
-from .precision_oven import APOSensor, AnovaPrecisionOven, APOState, Target
+from .precision_oven import AnovaPrecisionOven, APOState, Target
 from .api import AnovaOvenApi, AnovaOvenUpdateListener
-from .models import AnovaOvenData
-from .const import CONF_APP_KEY, CONF_REFRESH_TOKEN, EVENT_COOK_TARGET_REACHED
+from .const import CONF_REFRESH_TOKEN, EVENT_COOK_TARGET_REACHED
 
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_DEVICES
+from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DOMAIN
 

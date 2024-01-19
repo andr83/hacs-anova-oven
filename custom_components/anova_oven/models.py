@@ -1,7 +1,6 @@
 """Dataclass models for the Anova integration."""
 from dataclasses import dataclass
 
-from .precision_oven import AnovaPrecisionOven
 
 # from .coordinator import AnovaCoordinator
 

@@ -1,12 +1,11 @@
 # The contents of this file is based on https://github.com/home-assistant/core/blob/dev/pyproject.toml
 
-target-version = "py310"
+target-version = "py311"
 
 select = [
     "B007", # Loop control variable {name} not used within loop body
     "B014", # Exception handler with duplicate exception
     "C",  # complexity
-    "D",  # docstrings
     "E",  # pycodestyle
     "F",  # pyflakes/autoflake
     "ICN001", # import concentions; {name} should be imported as {asname}

@@ -1,18 +1,15 @@
 """Support for Anova Sensors."""
 from __future__ import annotations
 
-from typing import Callable, Literal
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum, auto
 
 from homeassistant import config_entries
 from homeassistant.components.sensor import (
-    SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
-    SensorStateClass,
 )
-from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType

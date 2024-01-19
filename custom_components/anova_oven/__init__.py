@@ -18,7 +18,6 @@ from .util import to_fahrenheit
 from .api import AnovaOvenApi
 from .coordinator import AnovaCoordinator
 from .precision_oven import AnovaPrecisionOven, APOCommand, APOStage
-from .models import AnovaOvenData
 
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]

@@ -1,5 +1,4 @@
 import re
-from typing import Dict
 from dataclasses import fields, is_dataclass
 
 
@@ -9,7 +8,7 @@ def snake_case_to_camel_case(input_string):
     return "".join(camel_case_words)
 
 
-def dict_keys_to_camel_case(data: Dict):
+def dict_keys_to_camel_case(data: dict):
     res = {}
     for k, v in data.items():
         if isinstance(v, dict):

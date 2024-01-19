@@ -2,22 +2,18 @@ import asyncio
 import json
 import logging
 import time
-import typing
-from typing import Tuple
 
 import aiohttp
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from aiohttp.client_ws import ClientWebSocketResponse
 
-from dataclasses import dataclass, asdict
 
 from .precision_oven import (
     AnovaPrecisionOven,
     APOState,
     APOSensor,
     APOCommand,
-    APOStage,
     ProbeTarget,
     Target,
     TimerTarget,
@@ -64,7 +60,7 @@ class AnovaOvenApi:
             url = f"https://devices.anovaculinary.io/?token={self.access_token}&supportedAccessories=APO&platform={PLATFORM}"
             headers = {
                 "Sec-WebSocket-Protocol": "ANOVA_V2",
-                "Sec-WebSocket-Version": "13",                
+                "Sec-WebSocket-Version": "13",
             }
             async with self.session.ws_connect(url, headers=headers) as ws:
                 self._ws = ws
@@ -186,8 +182,8 @@ class AnovaOvenApi:
                                         device_id = payload["cookerId"]
                                         device = self.devices[device_id]
                                         device.state = state
-                                        for l in self._listeners:
-                                            await l.on_state(device, state)
+                                        for listener in self._listeners:
+                                            await listener.on_state(device, state)
 
                                         current_target: Target | None = None
                                         if (
@@ -210,13 +206,13 @@ class AnovaOvenApi:
                                             target = current_target
                                             target_was_fired = False
                                         if not target_was_fired and target and target.reached:
-                                            for l in self._listeners:
-                                                await l.on_target_reached(
+                                            for listener in self._listeners:
+                                                await listener.on_target_reached(
                                                     device, target
                                                 )
                                     case "EVENT_APO_WIFI_LIST":
                                         payload = data.get("payload")
-                                        new_devices: typing.List[Tuple[str, str]] = [
+                                        new_devices: list[tuple[str, str]] = [
                                             (d["cookerId"], d["type"])
                                             for d in payload
                                             if d["cookerId"] not in self.devices
@@ -228,8 +224,8 @@ class AnovaOvenApi:
                                                 type=device[1],
                                             )
                                             self.devices[device[0]] = oven
-                                            for l in self._listeners:
-                                                await l.on_new_device(oven)
+                                            for listener in self._listeners:
+                                                await listener.on_new_device(oven)
 
                                     case "RESPONSE":
                                         if self._response_fut:
@@ -276,13 +272,13 @@ class AnovaOvenApi:
 
                 _LOGGER.info("Token refreshed.")
 
-                for l in self._listeners:
-                    await l.on_new_token(self.access_token, self.refresh_token)
+                for listener in self._listeners:
+                    await listener.on_new_token(self.access_token, self.refresh_token)
         except Exception as err:
-            _LOGGER.exception("Failed renew token: {err}")
+            _LOGGER.exception(f"Failed renew token: {err}")
             raise InvalidAuth("Access Token invalid")
 
-    async def get_devices(self) -> typing.List[AnovaPrecisionOven]:
+    async def get_devices(self) -> list[AnovaPrecisionOven]:
         timeout = time.time() + 5.5  # 5 seconds from now
         while time.time() < timeout:
             if self.devices:

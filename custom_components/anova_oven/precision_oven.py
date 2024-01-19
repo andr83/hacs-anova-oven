@@ -1,9 +1,6 @@
 import logging
-import secrets
-import string
 from dataclasses import dataclass
-from typing import Self, Generic, TypeVar, Optional
-import aiohttp
+from typing import Generic, TypeVar, Optional
 
 _LOGGER = logging.getLogger(__name__)
 
