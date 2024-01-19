@@ -5,7 +5,7 @@
 [![License][license-shield]](LICENSE)
 [![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
-This integration relies on the reverse engineering of the Anova Precision Oven WebSocket API as implemented in this project. https://github.com/bogd/anova-oven-api/tree/main
+This integration relies on the reverse engineering of the Anova Precision Oven WebSocket API as implemented in [this](https://github.com/bogd/anova-oven-api/tree/main) project.
 
 
 **This integration will set up the following sensors and services.**
