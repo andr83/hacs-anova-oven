@@ -5,7 +5,8 @@
     "@andr83"
   ],
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/anova_oven",
+  "documentation": "https://github.com/andr83/hacs-anova-oven",
+  "issue_tracker": "https://github.com/andr83/hacs-anova-oven/issues",
   "iot_class": "cloud_push",
   "version": "0.0.1"
 }
