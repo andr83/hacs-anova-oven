@@ -125,7 +125,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             rack_position=3,
             steam_generators=APOStage.SteamGenerators(
                 mode="relative-humidity",
-                relative_humidity=APOStage.SteamGenerators.Setpoint(setpoint=100),
+                relative_humidity=APOStage.SteamGenerators.Setpoint(
+                    setpoint=call.data.get(
+                        "target_humidity", 100 if call.data["sous_vide"] else 0
+                    )
+                ),
             ),
             probe_added=call.data.get("temperature_probe") is not None,
             temperature_probe=APOStage.Probe(

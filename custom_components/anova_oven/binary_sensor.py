@@ -5,8 +5,6 @@ from typing import Callable, Literal
 from dataclasses import dataclass
 from enum import StrEnum, auto
 
-from anova_wifi import APCUpdateSensor
-
 from homeassistant import config_entries
 from homeassistant.components.sensor import (
     SensorDeviceClass,

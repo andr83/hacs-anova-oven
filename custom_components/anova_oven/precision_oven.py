@@ -33,6 +33,11 @@ class APOSensor:
             target_temperature: float
 
         @dataclass
+        class TemperatureProbe:
+            temperature: float
+            target_temperature: float
+
+        @dataclass
         class HeatingElement:
             watts: int
             on: bool
@@ -56,6 +61,7 @@ class APOSensor:
         cook: Cook
         timer: Timer | None
         temperature_bulbs: TemperatureBulbs
+        temperature_probe: TemperatureProbe
         steam_generator: SteamGenerator
         rear_heating: HeatingElement
         bottom_heating: HeatingElement
@@ -73,7 +79,43 @@ class APOSensor:
 
 @dataclass
 class APOState:
+    @dataclass
+    class Stages:
+        active: int
+        count: int
+
     sensor: APOSensor
+    stages: Stages
+
+
+class Target:
+    @property
+    def reached(self) -> bool:
+        pass
+
+
+@dataclass
+class ProbeTarget(Target):
+    temperature: float
+    target_temperature: float
+
+    @property
+    def reached(self) -> bool:
+        return (
+            self.temperature
+            and self.target_temperature
+            and self.temperature >= self.target_temperature
+        )
+
+
+@dataclass
+class TimerTarget(Target):
+    initial: int
+    current: int
+
+    @property
+    def reached(self) -> bool:
+        return self.current and self.initial and self.current >= self.initial
 
 
 class AnovaPrecisionOven:
@@ -82,120 +124,6 @@ class AnovaPrecisionOven:
         self.type = type
         self.state: APOState | None = None
         self.temperature_unit: str = "C"
-
-
-# {
-#     "stepType": "stage",
-#     "id": "android-<uuid>",         # Or ios-<uuid>
-#     "title": "First stage",         # The name of the stage (as set in the app)
-#     "description": "",
-#     "type": "preheat",
-#     "userActionRequired": false,    # "false" if the stage starts automatically, "true" if it needs to be started manually
-#     "temperatureBulbs": {
-#         "dry": {                    # "dry" or "wet", depending on "mode"
-#             "setpoint": {           # Set temperature, in both Fahrenheit and Celsius. Unknown which one takes precedence if they differ!
-#                 "fahrenheit": 410,
-#                 "celsius": 210
-#             }
-#         },
-#         "mode": "dry"               # "sous-vide mode: on" == "mode: wet"; "sous-vide mode: off" == "mode: dry"
-#     },
-#     "heatingElements": {            # What heating elements are activated
-#         "bottom": {
-#         "on": false
-#         },
-#         "top": {
-#         "on": false
-#         },
-#         "rear": {
-#         "on": true
-#         }
-#     },
-#     "fan": {                        # Fan speed
-#         "speed": 100
-#     },
-#     "vent": {                       # Unknown
-#         "open": false
-#     },
-#     "rackPosition": 3,              # Tray position
-#     "timerAdded": true,
-#     "timer": {                      # Only if "timerAdded": true
-#         "initial": 600              # Timer in seconds
-#     },
-#     "probeAdded": false,            # Timer and probe cannot be added at the same time!
-#     "temperatureProbe": {           # Only if "probeAdded": true
-#         "setpoint": {
-#             "fahrenheit": 97,       # Probe target temperature, in both Fahrenheit and Celsius. Unknown which one takes precedence if they differ!
-#             "celsius": 36
-#         }
-#     }
-# }
-
-# {
-#   "command": "CMD_APO_START",
-#   "payload": {
-#     "payload": {
-#       "cookId": "android-<uuid>",  # Or ios-<uuid>
-#       "stages": [
-#         <stage_list>
-#       ]
-#     },
-#     "type": "CMD_APO_START",
-#     "id": "<your_oven_id>"
-#   },
-#   "requestId": "<uuid>"
-# }
-
-# {
-#   "command": "CMD_APO_START",
-#   "payload": {
-#     "payload": {
-#       "cook_id": "ios-22e7e3a7-f54e-40ee-8521-16cc5ddb86ed",
-#       "stages": [
-#         {
-#           "id": "ios-79699629-6d83-4a5c-a688-0479edb9f32a",
-#           "type": "preheat",
-#           "temperature_bulbs": {
-#             "dry": null,
-#             "wet": {
-#               "fahrenheit": 203,
-#               "celsius": 95
-#             }
-#           },
-#           "heating_elements": {
-#             "bottom": {
-#               "on": false
-#             },
-#             "top": {
-#               "on": false
-#             },
-#             "rear": {
-#               "on": true
-#             }
-#           },
-#           "rack_position": 3,
-#           "fan": {
-#             "speed": 100
-#           },
-#           "vent": {
-#             "open": false
-#           },
-#           "step_type": "stage",
-#           "title": "",
-#           "description": "",
-#           "user_action_requiered": false,
-#           "timer_added": false,
-#           "timer": null,
-#           "probe_added": false,
-#           "temperature_probe": null
-#         }
-#       ]
-#     },
-#     "type": "CMD_APO_START",
-#     "id": "0123673966ef4e7601"
-#   },
-#   "request_id": "efbe4d37-8b09-48a4-8ebd-e195ad89b289"
-# }
 
 
 @dataclass

@@ -26,6 +26,12 @@
       "temperature": {
         "name": "Temperature"
       },
+      "temperature_probe": {
+        "name": "Probe"
+      },
+      "target_temperature_probe": {
+        "name": "Target probe"
+      },
       "mode": {
         "name": "Mode"
       },
@@ -64,6 +70,12 @@
       },
       "timer_mode": {
         "name": "Timer mode"
+      },
+      "active_stage": {
+        "name": "Active stage"
+      },
+      "stages_count": {
+        "name": "Stages count"
       }
     },
     "binary_sensor": {
@@ -98,6 +110,10 @@
           "name": "Temperature",
           "description": "Target temperature. For souce vide mode it limits to 100°C"
         },
+        "target_humidity": {
+          "name": "Humidity",
+          "description": "Targer humidity."
+        },
         "heating_top": {
           "name": "Heat top",
           "description": "Enable top section heating."
@@ -129,6 +145,11 @@
           "description": "Id of the device."
         }
       }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cook_target_reached": "Cook target reached"
     }
   }
 }

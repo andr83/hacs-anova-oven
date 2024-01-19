@@ -4,8 +4,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from anova_wifi import APCUpdateSensor
-
 from homeassistant import config_entries
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -64,6 +62,22 @@ SENSOR_DESCRIPTIONS: list[SensorEntityDescription] = [
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: data.sensor.nodes.temperature_bulbs.target_temperature
+    ),
+    AnovaOvenSensorEntityDescription(
+        key="temperature_probe",
+        translation_key="temperature_probe",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data: data.sensor.nodes.temperature_probe.temperature if data.sensor.nodes.temperature_probe else None
+    ),
+    AnovaOvenSensorEntityDescription(
+        key="target_temperature_probe",
+        translation_key="target_temperature_probe",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data: data.sensor.nodes.temperature_probe.target_temperature if data.sensor.nodes.temperature_probe else None
     ),
     AnovaOvenSensorEntityDescription(
         key="rear_watts",
@@ -149,6 +163,20 @@ SENSOR_DESCRIPTIONS: list[SensorEntityDescription] = [
         key="timer_mode",
         translation_key="timer_mode",
         value_fn=lambda data: data.sensor.nodes.timer.mode
+    ),
+    AnovaOvenSensorEntityDescription(
+        key= "active_stage",
+        state_class=SensorStateClass.TOTAL,
+        translation_key="active_stage",
+        device_class=SensorDeviceClass.DATA_SIZE,
+        value_fn=lambda data: data.stages.active
+    ),
+    AnovaOvenSensorEntityDescription(
+        key= "stages_count",
+        state_class=SensorStateClass.TOTAL,
+        translation_key="stages_count",
+        device_class=SensorDeviceClass.DATA_SIZE,
+        value_fn=lambda data: data.stages.count
     ),
 ]
 

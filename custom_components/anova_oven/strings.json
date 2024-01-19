@@ -32,6 +32,12 @@
       "target_temperature": {
         "name": "Target temperature"
       },
+      "temperature_probe": {
+        "name": "Probe"
+      },
+      "target_temperature_probe": {
+        "name": "Target probe"
+      },
       "rear_watts": {
         "name": "Rear watts"
       },
@@ -64,6 +70,12 @@
       },
       "timer_mode": {
         "name": "Timer mode"
+      },
+      "active_stage": {
+        "name": "Active stage"
+      },
+      "stages_count": {
+        "name": "Stages count"
       }
     },
     "binary_sensor": {
@@ -110,6 +122,10 @@
           "name": "Heat rear",
           "description": "Enable rear section heating."
         },
+        "target_humidity": {
+          "name": "Humidity",
+          "description": "Targer humidity."
+        },
         "temperature_probe": {
           "name": "Probe",
           "description": "Probe temperature. Can not be used togerther with the timer."
@@ -129,6 +145,11 @@
           "description": "Id of the device."
         }
       }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cook_target_reached": "Cook target reached"
     }
   }
 }

@@ -21,6 +21,11 @@ Services
 1. Stop cooking
     ![Screenshot](images/Service_Stop_Cook.png)
 
+Events
+
+1. Cook target reached
+
+    Fired when probe or timer was set and they were reached their target value.
 
 ## Installation
 
@@ -59,11 +64,9 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 [buymecoffee]: https://www.buymeacoffee.com/andr83
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/ludeeus/integration_blueprint.svg?style=for-the-badge
+[commits-shield]: https://img.shields.io/github/commit-activity/y/andr83/hacs-anova-oven.svg?style=for-the-badge
 [commits]: https://github.com/andr83/hacs-anova-oven/commits/main
-[exampleimg]: example.png
-[license-shield]: https://img.shields.io/github/license/ludeeus/integration_blueprint.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-Joakim%20Sørensen%20%40ludeeus-blue.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/ludeeus/integration_blueprint.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/andr83/hacs-anova-oven.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/v/release/andr83/hacs-anova-oven.svg?style=for-the-badge
 [releases]: https://github.com/andr83/hacs-anova-oven/releases
 [hacs]: https://hacs.xyz

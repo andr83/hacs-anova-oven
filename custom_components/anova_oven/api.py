@@ -18,6 +18,9 @@ from .precision_oven import (
     APOSensor,
     APOCommand,
     APOStage,
+    ProbeTarget,
+    Target,
+    TimerTarget,
 )
 from .const import PLATFORM
 from .exceptions import CommandError, NoDevicesFound, InvalidAuth
@@ -25,9 +28,6 @@ from .util import snake_case_to_camel_case, dict_keys_to_camel_case, to_dict
 
 
 _LOGGER = logging.getLogger(__name__)
-
-# Found here - https://github.com/ammarzuberi/pyanova-api/blob/master/anova/AnovaCooker.py and personally confirmed.
-ANOVA_FIREBASE_KEY = "AIzaSyDQiOP2fTR9zvFcag2kSbcmG9zPh6gZhHw"
 
 
 class AnovaOvenApi:
@@ -64,17 +64,18 @@ class AnovaOvenApi:
             url = f"https://devices.anovaculinary.io/?token={self.access_token}&supportedAccessories=APO&platform={PLATFORM}"
             headers = {
                 "Sec-WebSocket-Protocol": "ANOVA_V2",
-                "Sec-WebSocket-Version": "13",
-                # "Sec-WebSocket-Key": "SeGqdmsI2a91XilH9/lu1w=="
+                "Sec-WebSocket-Version": "13",                
             }
             async with self.session.ws_connect(url, headers=headers) as ws:
                 self._ws = ws
+                target: Target = None
+                target_was_fired: bool = False
                 async for msg in ws:
                     attempt = 0
                     if self._shold_stop:
                         break
                     try:
-                        _LOGGER.info("Found message %s", msg)
+                        _LOGGER.debug("Found message %s", msg)
                         match msg.type:
                             case aiohttp.WSMsgType.TEXT:
                                 data = json.loads(msg.data)
@@ -95,6 +96,15 @@ class AnovaOvenApi:
                                         )
                                         cook = state.get("cook", {})
                                         timer = nodes.get("timer", {})
+                                        tp = nodes.get("temperatureProbe")
+
+                                        active_stage_index = None
+                                        for idx, s in enumerate(
+                                            (s for s in cook.get("stages", [])), start=1
+                                        ):
+                                            if s["id"] == cook.get("activeStageId"):
+                                                active_stage_index = idx
+                                                break
                                         state = APOState(
                                             sensor=APOSensor(
                                                 mode=state["state"]["mode"],
@@ -107,6 +117,20 @@ class AnovaOvenApi:
                                                             "secondsElapsed", 0
                                                         )
                                                     ),
+                                                    temperature_probe=APOSensor.Nodes.TemperatureProbe(
+                                                        temperature=tp["current"][
+                                                            "celsius"
+                                                        ]
+                                                        if "current" in tp
+                                                        else None,
+                                                        target_temperature=tp[
+                                                            "setpoint"
+                                                        ]["celsius"]
+                                                        if "setpoint" in tp
+                                                        else None,
+                                                    )
+                                                    if tp
+                                                    else None,
                                                     temperature_bulbs=APOSensor.Nodes.TemperatureBulbs(
                                                         mode=bulbs["mode"],
                                                         temperature=bulbs[
@@ -153,7 +177,11 @@ class AnovaOvenApi:
                                                     ],
                                                     fan_speed=nodes["fan"]["speed"],
                                                 ),
-                                            )
+                                            ),
+                                            stages=APOState.Stages(
+                                                active=active_stage_index,
+                                                count=len(cook.get("stages", [])),
+                                            ),
                                         )
                                         device_id = payload["cookerId"]
                                         device = self.devices[device_id]
@@ -161,6 +189,31 @@ class AnovaOvenApi:
                                         for l in self._listeners:
                                             await l.on_state(device, state)
 
+                                        current_target: Target | None = None
+                                        if (
+                                            state.sensor.nodes.temperature_probe
+                                            and state.sensor.nodes.temperature_probe.target_temperature
+                                        ):
+                                            current_target = ProbeTarget(
+                                                temperature=state.sensor.nodes.temperature_probe.temperature,
+                                                target_temperature=state.sensor.nodes.temperature_probe.target_temperature,
+                                            )
+                                        elif (
+                                            state.sensor.nodes.timer
+                                            and state.sensor.nodes.timer.initial
+                                        ):
+                                            current_target = TimerTarget(
+                                                current=state.sensor.nodes.timer.current,
+                                                initial=state.sensor.nodes.timer.initial,
+                                            )
+                                        if target != current_target:
+                                            target = current_target
+                                            target_was_fired = False
+                                        if not target_was_fired and target and target.reached:
+                                            for l in self._listeners:
+                                                await l.on_target_reached(
+                                                    device, target
+                                                )
                                     case "EVENT_APO_WIFI_LIST":
                                         payload = data.get("payload")
                                         new_devices: typing.List[Tuple[str, str]] = [
@@ -189,7 +242,7 @@ class AnovaOvenApi:
                             case aiohttp.WSMsgType.ERROR:
                                 break
                             case _:
-                                _LOGGER.info(f"Unknown message type: {msg}")
+                                _LOGGER.debug(f"Unknown message type: {msg}")
                         await asyncio.sleep(0)
                     except Exception as err:
                         _LOGGER.exception("Failed processing msg {msg}: {err}")
@@ -240,7 +293,7 @@ class AnovaOvenApi:
     async def send_command(self, command: APOCommand):
         if self._ws:
             data = dict_keys_to_camel_case(to_dict(command))
-            logging.info(json.dumps(data))
+            _LOGGER.info(json.dumps(data))
             self._response_fut = asyncio.Future()
             await self._ws.send_json(data)
             try:
@@ -252,11 +305,14 @@ class AnovaOvenApi:
 
 
 class AnovaOvenUpdateListener(ABC):
-    async def on_state(device: AnovaPrecisionOven, state: APOState):
+    async def on_state(self, device: AnovaPrecisionOven, state: APOState):
         pass
 
-    async def on_new_device(device: AnovaPrecisionOven):
+    async def on_new_device(self, device: AnovaPrecisionOven):
         pass
 
-    async def on_new_token(access_token: str, refresh_token: str):
+    async def on_new_token(self, access_token: str, refresh_token: str):
+        pass
+
+    async def on_target_reached(self, device: AnovaPrecisionOven, target: Target):
         pass

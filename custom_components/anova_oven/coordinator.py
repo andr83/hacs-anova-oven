@@ -4,10 +4,12 @@ from datetime import timedelta
 import logging
 import typing
 
-from .precision_oven import AnovaPrecisionOven, APOState
+from homeassistant.helpers import device_registry
+
+from .precision_oven import APOSensor, AnovaPrecisionOven, APOState, Target
 from .api import AnovaOvenApi, AnovaOvenUpdateListener
 from .models import AnovaOvenData
-from .const import CONF_APP_KEY, CONF_REFRESH_TOKEN
+from .const import CONF_APP_KEY, CONF_REFRESH_TOKEN, EVENT_COOK_TARGET_REACHED
 
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_DEVICES
 from homeassistant.config_entries import ConfigEntry
@@ -70,11 +72,16 @@ class AnovaCoordinator(DataUpdateCoordinator[APOState], AnovaOvenUpdateListener)
     async def on_new_token(self, access_token: str, refresh_token: str):
         self.hass.config_entries.async_update_entry(
             entry=self.entry,
-            data=self.entry.data | {
-                CONF_ACCESS_TOKEN: access_token,
-                CONF_REFRESH_TOKEN: refresh_token
-            },
+            data=self.entry.data
+            | {CONF_ACCESS_TOKEN: access_token, CONF_REFRESH_TOKEN: refresh_token},
         )
-        self.entry = self.hass.config_entries.async_get_entry(
-            self.entry.entry_id
-        )
+        self.entry = self.hass.config_entries.async_get_entry(self.entry.entry_id)
+
+    async def on_target_reached(self, device: AnovaPrecisionOven, target: Target):
+        dr = device_registry.async_get(self.hass)
+        d = dr.async_get_device(identifiers={(DOMAIN, device.cooker_id)})
+        event_data = {
+            "device_id": d.id,
+            "type": "cook_target_reached",
+        }
+        self.hass.bus.async_fire(EVENT_COOK_TARGET_REACHED, event_data)

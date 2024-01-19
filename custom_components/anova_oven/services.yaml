@@ -38,6 +38,13 @@ start_cook:
           max: 250
           unit_of_measurement: "°C"
           mode: slider
+    target_humidity:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: slider
     timer:
       required: false
       selector:
