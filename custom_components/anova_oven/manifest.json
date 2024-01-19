@@ -6,7 +6,7 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/andr83/hacs-anova-oven",
-  "issue_tracker": "https://github.com/andr83/hacs-anova-oven/issues",
   "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/andr83/hacs-anova-oven/issues",
   "version": "0.0.1"
 }
