@@ -67,8 +67,8 @@
       }
     },
     "binary_sensor": {
-      "souse_vide": {
-        "name": "Souse vide"
+      "sous_vide": {
+        "name": "Sous vide"
       },
       "lamp_on": {
         "name": "Lamp on"
@@ -90,8 +90,8 @@
           "name": "Device ID",
           "description": "Id of the device."
         },
-        "souse_vide": {
-          "name": "Souse vide",
+        "sous_vide": {
+          "name": "Sous vide",
           "description": "Enable low temperature cooking mode."
         },
         "target_temperature": {
