@@ -155,6 +155,10 @@
         "timer": {
           "name": "Timer",
           "description": "Cooking timer. Can not be used togerther with the probe."
+        },
+        "timer_mode": {
+          "name": "Timer starts",
+          "description": "When cooking timer starts."
         }
       }
     },

@@ -77,6 +77,15 @@ start_cook:
       required: false
       selector:
         duration:
+    timer_mode:
+      required: false
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - Immediately
+            - When Preheated
+            - Manually
 
 stop_cook:
   fields:

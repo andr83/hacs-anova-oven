@@ -112,12 +112,22 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         temperature_probe_celsius = None
         temperature_probe_fahrenheit = None
 
+        preheat_required = False
+        user_action_required = False
+
+        match call.data.get("timer_mode"):
+            case "When Preheated":
+                preheat_required = True
+            case "Manually":
+                preheat_required = True
+                user_action_required = True
+
         match uot:
             case AnovaUnitOfTemperature.CELSIUS:
                 if (
-                    target_temperature_celsius := call.data[
+                    target_temperature_celsius := call.data.get(
                         "target_temperature_celsius"
-                    ]
+                    )
                 ) is None:
                     raise ValueError(
                         "This service requires field Target temperature, please enter a valid value."
@@ -162,7 +172,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             title="",
             description="",
             type="preheat",
-            user_action_required=False,
+            user_action_required=user_action_required,
             temperature_bulbs=APOStage.TemperatureBulbs(
                 dry=APOStage.TemperatureBulb(
                     setpoint=APOStage.TemperatureSetpoint(
@@ -205,6 +215,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
             if temperature_probe_celsius is not None
             else None,
+        )
+        cook_stage = dataclasses.replace(
+            preheat_stage,
+            id=f"{PLATFORM}-{uuid.uuid4()}",
+            type="cook",
+            user_action_required=user_action_required,
             timer_added=timer is not None,
             timer=APOStage.Timer(
                 initial=timer["hours"] * 3600 + timer["minutes"] * 60 + timer["seconds"]
@@ -212,11 +228,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             if timer
             else None,
         )
-        cook_stage = dataclasses.replace(
-            preheat_stage,
-            id=f"{PLATFORM}-{uuid.uuid4()}",
-            type="cook",
-        )
+        stages = []
+        if preheat_required:
+            stages.append(preheat_stage)
+        stages.append(cook_stage)
         await api.send_command(
             APOCommand(
                 command="CMD_APO_START",
@@ -224,7 +239,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 payload=APOCommand.Payload(
                     payload=APOCommand.APOStartPayload(
                         cook_id=f"{PLATFORM}-{uuid.uuid4()}",
-                        stages=[preheat_stage, cook_stage],
+                        stages=stages,
                     ),
                     type="CMD_APO_START",
                     id=cook_id,
