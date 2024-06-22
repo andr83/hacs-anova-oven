@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Optional
+from typing import Generic, Optional, TypeVar
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +18,12 @@ P = TypeVar("P")
 
 
 @dataclass
+class Temperature:
+    celsius: float
+    fahrenheit: float
+
+
+@dataclass
 class APOSensor:
     @dataclass
     class Nodes:
@@ -26,13 +32,13 @@ class APOSensor:
             mode: str
             dosed: bool
             dose_failed: bool
-            temperature: float
-            target_temperature: float
+            temperature: Temperature
+            target_temperature: Temperature
 
         @dataclass
         class TemperatureProbe:
-            temperature: float
-            target_temperature: float
+            temperature: Temperature
+            target_temperature: Temperature
 
         @dataclass
         class HeatingElement:
@@ -93,15 +99,15 @@ class Target:
 
 @dataclass
 class ProbeTarget(Target):
-    temperature: float
-    target_temperature: float
+    temperature: Temperature
+    target_temperature: Temperature
 
     @property
     def reached(self) -> bool:
         return (
             self.temperature
             and self.target_temperature
-            and self.temperature >= self.target_temperature
+            and self.temperature.celsius >= self.target_temperature.celsius
         )
 
 

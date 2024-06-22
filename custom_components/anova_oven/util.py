@@ -23,6 +23,11 @@ def to_fahrenheit(celsius: int):
     return int((1.8 * celsius) + 32)
 
 
+def to_celsius(fahrenheit):
+    celsius = (fahrenheit - 32) * 5.0 / 9.0
+    return celsius
+
+
 def to_dict(instance):
     res = {}
     for field in fields(instance):

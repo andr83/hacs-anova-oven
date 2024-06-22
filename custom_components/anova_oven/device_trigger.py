@@ -1,9 +1,10 @@
 """Provides device automations for Arcam FMJ Receiver control."""
-from __future__ import annotations
 
+from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant.components.device_automation import DEVICE_TRIGGER_BASE_SCHEMA
+from homeassistant.components.homeassistant.triggers import event as event_trigger
 from homeassistant.const import (
     CONF_DEVICE,
     CONF_DEVICE_ID,
@@ -14,7 +15,6 @@ from homeassistant.const import (
 )
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant
 from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
-from homeassistant.components.homeassistant.triggers import event as event_trigger
 from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN, EVENT_COOK_TARGET_REACHED

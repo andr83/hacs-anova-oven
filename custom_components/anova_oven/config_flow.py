@@ -1,24 +1,29 @@
 """Config flow for Anova Precision Oven integration."""
+
 from __future__ import annotations
 
-import logging
 import asyncio
+import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_DEVICES
-from homeassistant.core import HomeAssistant
+from homeassistant.const import (
+    CONF_ACCESS_TOKEN,
+    CONF_DEVICES,
+    CONF_TEMPERATURE_UNIT,
+)
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, CONF_REFRESH_TOKEN, CONF_APP_KEY
 from .api import AnovaOvenApi
-from .exceptions import NoDevicesFound, InvalidAuth
+from .const import CONF_APP_KEY, CONF_REFRESH_TOKEN, DOMAIN, AnovaUnitOfTemperature
+from .exceptions import InvalidAuth, NoDevicesFound
 from .precision_oven import AnovaPrecisionOven
 
 _LOGGER = logging.getLogger(__name__)
+
 
 # TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
@@ -26,6 +31,17 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_APP_KEY): str,
         vol.Required(CONF_ACCESS_TOKEN): str,
         vol.Required(CONF_REFRESH_TOKEN): str,
+        vol.Required(
+            CONF_TEMPERATURE_UNIT, default=AnovaUnitOfTemperature.CELSIUS
+        ): vol.All(vol.Coerce(str), vol.In([e.value for e in AnovaUnitOfTemperature])),
+    }
+)
+
+STEP_OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Optional(
+            CONF_TEMPERATURE_UNIT, default=AnovaUnitOfTemperature.CELSIUS
+        ): vol.All(vol.Coerce(str), vol.In([e.value for e in AnovaUnitOfTemperature])),
     }
 )
 
@@ -89,10 +105,38 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_REFRESH_TOKEN: user_input[CONF_REFRESH_TOKEN],
                         CONF_DEVICES: device_list,
                     },
+                    options={
+                        CONF_TEMPERATURE_UNIT: user_input[CONF_TEMPERATURE_UNIT],
+                    },
                 )
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
+        """Create the options flow."""
+        return AnovaOvenOptionsFlowHandler(config_entry)
+
+
+class AnovaOvenOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            entry = self.async_create_entry(title="", data=user_input)
+            return entry
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                STEP_OPTIONS_SCHEMA, self.config_entry.options
+            ),
         )
 
 

@@ -2,26 +2,24 @@ import asyncio
 import json
 import logging
 import time
-
-import aiohttp
 from abc import ABC
 
+import aiohttp
 from aiohttp.client_ws import ClientWebSocketResponse
 
-
+from .const import PLATFORM, AnovaUnitOfTemperature
+from .exceptions import CommandError, InvalidAuth, NoDevicesFound
 from .precision_oven import (
     AnovaPrecisionOven,
-    APOState,
-    APOSensor,
     APOCommand,
+    APOSensor,
+    APOState,
     ProbeTarget,
     Target,
+    Temperature,
     TimerTarget,
 )
-from .const import PLATFORM
-from .exceptions import CommandError, NoDevicesFound, InvalidAuth
-from .util import snake_case_to_camel_case, dict_keys_to_camel_case, to_dict
-
+from .util import dict_keys_to_camel_case, snake_case_to_camel_case, to_dict
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +34,7 @@ class AnovaOvenApi:
         access_token: str,
         refresh_token: str,
         existing_devices: list[AnovaPrecisionOven] | None = None,
+        unit_of_temperature: AnovaUnitOfTemperature = AnovaUnitOfTemperature.CELSIUS,
     ) -> None:
         """Creates an anova api class"""
         self.devices = {d.cooker_id: d for d in existing_devices or []}
@@ -47,6 +46,7 @@ class AnovaOvenApi:
         self._listeners: list[AnovaOvenUpdateListener] = []
         self._ws: ClientWebSocketResponse | None = None
         self._response_fut: asyncio.Future | None
+        self.unit_of_temperature = unit_of_temperature
 
     def add_listener(self, listener: "AnovaOvenUpdateListener"):
         self._listeners.append(listener)
@@ -114,14 +114,24 @@ class AnovaOvenApi:
                                                         )
                                                     ),
                                                     temperature_probe=APOSensor.Nodes.TemperatureProbe(
-                                                        temperature=tp["current"][
-                                                            "celsius"
-                                                        ]
+                                                        temperature=Temperature(
+                                                            celsius=tp["current"][
+                                                                "celsius"
+                                                            ],
+                                                            fahrenheit=tp["current"][
+                                                                "fahrenheit"
+                                                            ],
+                                                        )
                                                         if "current" in tp
                                                         else None,
-                                                        target_temperature=tp[
-                                                            "setpoint"
-                                                        ]["celsius"]
+                                                        target_temperature=Temperature(
+                                                            celsius=tp["setpoint"][
+                                                                "celsius"
+                                                            ],
+                                                            fahrenheit=tp["setpoint"][
+                                                                "fahrenheit"
+                                                            ],
+                                                        )
                                                         if "setpoint" in tp
                                                         else None,
                                                     )
@@ -129,12 +139,22 @@ class AnovaOvenApi:
                                                     else None,
                                                     temperature_bulbs=APOSensor.Nodes.TemperatureBulbs(
                                                         mode=bulbs["mode"],
-                                                        temperature=bulbs[
-                                                            bulbs["mode"]
-                                                        ]["current"]["celsius"],
-                                                        target_temperature=bulbs[
-                                                            bulbs["mode"]
-                                                        ]["setpoint"]["celsius"],
+                                                        temperature=Temperature(
+                                                            celsius=bulbs[
+                                                                bulbs["mode"]
+                                                            ]["current"]["celsius"],
+                                                            fahrenheit=bulbs[
+                                                                bulbs["mode"]
+                                                            ]["current"]["fahrenheit"],
+                                                        ),
+                                                        target_temperature=Temperature(
+                                                            celsius=bulbs[
+                                                                bulbs["mode"]
+                                                            ]["setpoint"]["celsius"],
+                                                            fahrenheit=bulbs[
+                                                                bulbs["mode"]
+                                                            ]["setpoint"]["fahrenheit"],
+                                                        ),
                                                         dosed=bulbs["wet"]["dosed"],
                                                         dose_failed=bulbs["wet"][
                                                             "doseFailed"
@@ -205,7 +225,11 @@ class AnovaOvenApi:
                                         if target != current_target:
                                             target = current_target
                                             target_was_fired = False
-                                        if not target_was_fired and target and target.reached:
+                                        if (
+                                            not target_was_fired
+                                            and target
+                                            and target.reached
+                                        ):
                                             for listener in self._listeners:
                                                 await listener.on_target_reached(
                                                     device, target

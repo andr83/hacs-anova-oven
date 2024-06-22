@@ -3,9 +3,10 @@
     "step": {
       "user": {
         "data": {
-          "app_key": "[%key:common::config_flow::data::app_key%]",
+          "app_key": "[%key:common::config_flow::data::api_key%]",
           "access_token": "[%key:common::config_flow::data::access_token%]",
-          "refresh_token": "[%key:common::config_flow::data::refresh_token%]"
+          "refresh_token": "Refresh token",
+          "temperature_unit": "Temperature unit"
         }
       }
     },
@@ -16,6 +17,19 @@
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Anova Oven",
+        "data": {
+          "app_key": "[%key:common::config_flow::data::api_key%]",
+          "access_token": "[%key:common::config_flow::data::access_token%]",
+          "refresh_token": "Refresh token",
+          "temperature_unit": "Temperature unit"
+        }
+      }
     }
   },
   "entity": {
@@ -106,9 +120,13 @@
           "name": "Sous vide",
           "description": "Enable low temperature cooking mode."
         },
-        "target_temperature": {
+        "target_temperature_celsius": {
           "name": "Temperature",
           "description": "Target temperature. For souce vide mode it limits to 100°C"
+        },
+        "target_temperature_fahrenheit": {
+          "name": "Temperature",
+          "description": "Target temperature. For souce vide mode it limits to 212°F"
         },
         "heating_top": {
           "name": "Heat top",
@@ -126,7 +144,11 @@
           "name": "Humidity",
           "description": "Targer humidity."
         },
-        "temperature_probe": {
+        "temperature_probe_celsius": {
+          "name": "Probe",
+          "description": "Probe temperature. Can not be used togerther with the timer."
+        },
+        "temperature_probe_fahrenheit": {
           "name": "Probe",
           "description": "Probe temperature. Can not be used togerther with the timer."
         },

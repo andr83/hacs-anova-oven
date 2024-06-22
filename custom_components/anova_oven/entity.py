@@ -1,12 +1,14 @@
 """Base entity for the Anova integration."""
+
 from __future__ import annotations
 
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.device_registry import DeviceInfo
 
-from .coordinator import AnovaCoordinator
 from .const import DOMAIN
+from .coordinator import AnovaCoordinator
+
 
 class AnovaOvenEntity(CoordinatorEntity[AnovaCoordinator], Entity):
     """Defines an Anova entity."""
@@ -26,7 +28,9 @@ class AnovaOvenEntity(CoordinatorEntity[AnovaCoordinator], Entity):
                 name="Anova Precision Oven",
                 manufacturer="Anova",
                 model="Precision Oven",
-                sw_version=device.state.sensor.firmware_version if device.state else '0.0.0',
+                sw_version=device.state.sensor.firmware_version
+                if device.state
+                else "0.0.0",
             )
 
 
@@ -37,7 +41,7 @@ class AnovaOvenDescriptionEntity(AnovaOvenEntity):
         self,
         cooker_id: str,
         coordinator: AnovaCoordinator,
-        description: EntityDescription
+        description: EntityDescription,
     ) -> None:
         """Initialize the entity and declare unique id based on description key."""
         super().__init__(cooker_id, coordinator)

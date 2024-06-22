@@ -10,14 +10,28 @@ start_cook:
       default: false
       selector:
         boolean:
-    target_temperature:
-      required: true
+    target_temperature_celsius:
+      required: false
       selector:
         number:
           min: 20
           max: 250
           unit_of_measurement: "°C"
           mode: slider
+      filter:
+        supported_features:
+          - climate.ClimateEntityFeature.TARGET_TEMPERATURE
+    target_temperature_fahrenheit:
+      required: false
+      selector:
+        number:
+          min: 68
+          max: 482
+          unit_of_measurement: "°F"
+          mode: slider
+      filter:
+        supported_features:
+          - climate.ClimateEntityFeature.TARGET_HUMIDITY
     heating_top:
       default: false
       selector:
@@ -30,7 +44,7 @@ start_cook:
       default: true
       selector:
         boolean:
-    temperature_probe:
+    temperature_probe_celsius:
       required: false
       selector:
         number:
@@ -38,6 +52,20 @@ start_cook:
           max: 250
           unit_of_measurement: "°C"
           mode: slider
+      filter:
+        supported_features:
+          - climate.ClimateEntityFeature.TARGET_TEMPERATURE
+    temperature_probe_fahrenheit:
+      required: false
+      selector:
+        number:
+          min: 68
+          max: 482
+          unit_of_measurement: "°F"
+          mode: slider
+      filter:
+        supported_features:
+          - climate.ClimateEntityFeature.TARGET_HUMIDITY
     target_humidity:
       required: false
       selector:

@@ -56,6 +56,12 @@ Detailed instructions how to do it you can find [here](https://github.com/bogd/a
 
 ![Screenshot](images/Configuration.png)
 
+The Entity configuration allow to choose the unit of temperature: Celsius or Fahrenheit.
+It will impact on service "Start cooking" configuration. If you want to change display format of sensors - 
+you can do it manually for each sensor like on screenshot:
+
+![Screenshot](images/ChangeUnitOfTemperature.png)
+
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)

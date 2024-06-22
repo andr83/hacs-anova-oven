@@ -1,155 +1,177 @@
 {
-  "config": {
-    "abort": {
-      "already_configured": "Device is already configured"
-    },
-    "error": {
-      "cannot_connect": "Failed to connect",
-      "invalid_auth": "Invalid authentication",
-      "unknown": "Unexpected error"
-    },
-    "step": {
-      "user": {
-        "data": {
-          "app_key": "App key",
-          "access_token": "Access token",
-          "refresh_token": "Refresh token"
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "access_token": "Access token",
+                    "app_key": "API key",
+                    "refresh_token": "Refresh token",
+                    "temperature_unit": "Temperature unit"
+                }
+            }
         }
-      }
-    }
-  },
-  "entity": {
-    "sensor": {
-      "target_temperature": {
-        "name": "Target temperature"
-      },
-      "temperature": {
-        "name": "Temperature"
-      },
-      "temperature_probe": {
-        "name": "Probe"
-      },
-      "target_temperature_probe": {
-        "name": "Target probe"
-      },
-      "mode": {
-        "name": "Mode"
-      },
-      "bulb_mode": {
-        "name": "Bulb mode"
-      },
-      "rear_watts": {
-        "name": "Rear watts"
-      },
-      "bottom_watts": {
-        "name": "Bottom watts"
-      },
-      "top_watts": {
-        "name": "Top watts"
-      },
-      "fan_speed": {
-        "name": "Fan speed"
-      },
-      "relative_humidity": {
-        "name": "Humidity"
-      },
-      "target_humidity": {
-        "name": "Target humidity"
-      },
-      "steam_generator_mode": {
-        "name": "Steam generator mode"
-      },
-      "cook_time": {
-        "name": "Cook time"
-      },
-      "timer": {
-        "name": "Timer"
-      },
-      "timer_initial": {
-        "name": "Timer initial"
-      },
-      "timer_mode": {
-        "name": "Timer mode"
-      },
-      "active_stage": {
-        "name": "Active stage"
-      },
-      "stages_count": {
-        "name": "Stages count"
-      }
     },
-    "binary_sensor": {
-      "sous_vide": {
-        "name": "Sous vide"
-      },
-      "lamp_on": {
-        "name": "Lamp on"
-      },
-      "door_closed": {
-        "name": "Door closed"
-      },
-      "water_tank_empty": {
-        "name": "Water tank empty"
-      }
-    }
-  },
-  "services": {
-    "start_cook": {
-      "name": "Start cooking",
-      "description": "Configure cooking and start it.",
-      "fields": {
-        "device_id": {
-          "name": "Device ID",
-          "description": "Id of the device."
-        },
-        "sous_vide": {
-          "name": "Sous vide",
-          "description": "Enable low temperature cooking mode."
-        },
-        "target_temperature": {
-          "name": "Temperature",
-          "description": "Target temperature. For souce vide mode it limits to 100°C"
-        },
-        "target_humidity": {
-          "name": "Humidity",
-          "description": "Targer humidity."
-        },
-        "heating_top": {
-          "name": "Heat top",
-          "description": "Enable top section heating."
-        },
-        "heating_bottom": {
-          "name": "Heat bottom",
-          "description": "Enable bottom section heating."
-        },
-        "heating_rear": {
-          "name": "Heat rear",
-          "description": "Enable rear section heating."
-        },
-        "temperature_probe": {
-          "name": "Probe",
-          "description": "Probe temperature. Can not be used togerther with the timer."
-        },
-        "timer": {
-          "name": "Timer",
-          "description": "Cooking timer. Can not be used togerther with the probe."
+    "device_automation": {
+        "trigger_type": {
+            "cook_target_reached": "Cook target reached"
         }
-      }
     },
-    "stop_cook": {
-      "name": "Stop cooking",
-      "description": "Stop cooking all stages.",
-      "fields": {
-        "device_id": {
-          "name": "Device ID",
-          "description": "Id of the device."
+    "entity": {
+        "binary_sensor": {
+            "door_closed": {
+                "name": "Door closed"
+            },
+            "lamp_on": {
+                "name": "Lamp on"
+            },
+            "sous_vide": {
+                "name": "Sous vide"
+            },
+            "water_tank_empty": {
+                "name": "Water tank empty"
+            }
+        },
+        "sensor": {
+            "active_stage": {
+                "name": "Active stage"
+            },
+            "bottom_watts": {
+                "name": "Bottom watts"
+            },
+            "bulb_mode": {
+                "name": "Bulb mode"
+            },
+            "cook_time": {
+                "name": "Cook time"
+            },
+            "fan_speed": {
+                "name": "Fan speed"
+            },
+            "mode": {
+                "name": "Mode"
+            },
+            "rear_watts": {
+                "name": "Rear watts"
+            },
+            "relative_humidity": {
+                "name": "Humidity"
+            },
+            "stages_count": {
+                "name": "Stages count"
+            },
+            "steam_generator_mode": {
+                "name": "Steam generator mode"
+            },
+            "target_humidity": {
+                "name": "Target humidity"
+            },
+            "target_temperature": {
+                "name": "Target temperature"
+            },
+            "target_temperature_probe": {
+                "name": "Target probe"
+            },
+            "temperature": {
+                "name": "Temperature"
+            },
+            "temperature_probe": {
+                "name": "Probe"
+            },
+            "timer": {
+                "name": "Timer"
+            },
+            "timer_initial": {
+                "name": "Timer initial"
+            },
+            "timer_mode": {
+                "name": "Timer mode"
+            },
+            "top_watts": {
+                "name": "Top watts"
+            }
         }
-      }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "access_token": "Access token",
+                    "app_key": "API key",
+                    "refresh_token": "Refresh token",
+                    "temperature_unit": "Temperature unit"
+                },
+                "title": "Configure Anova Oven"
+            }
+        }
+    },
+    "services": {
+        "start_cook": {
+            "description": "Configure cooking and start it.",
+            "fields": {
+                "device_id": {
+                    "description": "Id of the device.",
+                    "name": "Device ID"
+                },
+                "heating_bottom": {
+                    "description": "Enable bottom section heating.",
+                    "name": "Heat bottom"
+                },
+                "heating_rear": {
+                    "description": "Enable rear section heating.",
+                    "name": "Heat rear"
+                },
+                "heating_top": {
+                    "description": "Enable top section heating.",
+                    "name": "Heat top"
+                },
+                "sous_vide": {
+                    "description": "Enable low temperature cooking mode.",
+                    "name": "Sous vide"
+                },
+                "target_humidity": {
+                    "description": "Targer humidity.",
+                    "name": "Humidity"
+                },
+                "target_temperature_celsius": {
+                    "description": "Target temperature. For souce vide mode it limits to 100\u00b0C",
+                    "name": "Temperature"
+                },
+                "target_temperature_fahrenheit": {
+                    "description": "Target temperature. For souce vide mode it limits to 212\u00b0F",
+                    "name": "Temperature"
+                },
+                "temperature_probe_celsius": {
+                    "description": "Probe temperature. Can not be used togerther with the timer.",
+                    "name": "Probe"
+                },
+                "temperature_probe_fahrenheit": {
+                    "description": "Probe temperature. Can not be used togerther with the timer.",
+                    "name": "Probe"
+                },
+                "timer": {
+                    "description": "Cooking timer. Can not be used togerther with the probe.",
+                    "name": "Timer"
+                }
+            },
+            "name": "Start cooking"
+        },
+        "stop_cook": {
+            "description": "Stop cooking all stages.",
+            "fields": {
+                "device_id": {
+                    "description": "Id of the device.",
+                    "name": "Device ID"
+                }
+            },
+            "name": "Stop cooking"
+        }
     }
-  },
-  "device_automation": {
-    "trigger_type": {
-      "cook_target_reached": "Cook target reached"
-    }
-  }
 }

@@ -1,4 +1,5 @@
 """Support for Anova Sensors."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -15,8 +16,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
 from .const import DOMAIN
-from .entity import AnovaOvenDescriptionEntity
 from .coordinator import AnovaCoordinator
+from .entity import AnovaOvenDescriptionEntity
 from .precision_oven import APOSensor
 
 
@@ -28,6 +29,7 @@ class FormatType(StrEnum):
 @dataclass(frozen=True)
 class AnovaOvenBinarySensorEntityDescriptionMixin:
     """Describes the mixin variables for anova sensors."""
+
     format_type: FormatType
     value_fn: Callable[[APOSensor], bool]
 
@@ -44,7 +46,7 @@ SENSOR_DESCRIPTIONS: list[SensorEntityDescription] = [
         key="sous_vide",
         translation_key="sous_vide",
         format_type=FormatType.OnOff,
-        value_fn=lambda data: data.sensor.nodes.temperature_bulbs.mode == 'wet',
+        value_fn=lambda data: data.sensor.nodes.temperature_bulbs.mode == "wet",
     ),
     AnovaOvenBinarySensorEntityDescription(
         key="lamp_on",

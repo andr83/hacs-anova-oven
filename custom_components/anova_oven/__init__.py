@@ -1,44 +1,61 @@
 """The Anova Precision Oven integration."""
+
 from __future__ import annotations
 
-from homeassistant.const import ATTR_DEVICE_ID, CONF_ACCESS_TOKEN, CONF_DEVICES
+import dataclasses
+import uuid
+
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from homeassistant.const import (
+    ATTR_DEVICE_ID,
+    CONF_ACCESS_TOKEN,
+    CONF_DEVICES,
+    CONF_TEMPERATURE_UNIT,
+    Platform,
+)
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import aiohttp_client
-from homeassistant.helpers import device_registry
+from homeassistant.helpers import aiohttp_client, device_registry
 from homeassistant.helpers.typing import ConfigType
 
-import uuid
-import dataclasses
-
-from .const import DOMAIN, CONF_APP_KEY, CONF_REFRESH_TOKEN, PLATFORM
-from .util import to_fahrenheit
 from .api import AnovaOvenApi
+from .const import (
+    CONF_APP_KEY,
+    CONF_REFRESH_TOKEN,
+    DOMAIN,
+    PLATFORM,
+    AnovaUnitOfTemperature,
+)
 from .coordinator import AnovaCoordinator
 from .precision_oven import AnovaPrecisionOven, APOCommand, APOStage
-
+from .util import to_celsius, to_fahrenheit
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Anova Precision Oven from a config entry."""
+    entry.async_on_unload(entry.add_update_listener(update_listener))
+
+    data = entry.data | entry.options
+
     hass.data.setdefault(DOMAIN, {})
     devices = [
         AnovaPrecisionOven(
             cooker_id=device[0],
             type=device[1],
         )
-        for device in entry.data[CONF_DEVICES]
+        for device in data[CONF_DEVICES]
     ]
     api = AnovaOvenApi(
         session=aiohttp_client.async_get_clientsession(hass),
-        app_key=entry.data[CONF_APP_KEY],
-        access_token=entry.data[CONF_ACCESS_TOKEN],
-        refresh_token=entry.data[CONF_REFRESH_TOKEN],
+        app_key=data[CONF_APP_KEY],
+        access_token=data[CONF_ACCESS_TOKEN],
+        refresh_token=data[CONF_REFRESH_TOKEN],
         existing_devices=devices,
+        unit_of_temperature=data.get(
+            CONF_TEMPERATURE_UNIT, AnovaUnitOfTemperature.CELSIUS
+        ),
     )
     coordinator = AnovaCoordinator(api=api, hass=hass, entry=entry, devices=devices)
     await coordinator.async_setup()
@@ -82,12 +99,58 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         cook_id, api = get_api(call.data[ATTR_DEVICE_ID])
         timer = call.data.get("timer")
         probe = call.data.get("temperature_probe")
+        uot = api.unit_of_temperature
         if timer and probe:
             raise ValueError("Only probe or timer can be setup at one.")
-        if call.data["sous_vide"] and call.data["target_temperature"] > 100:
-            raise ValueError(
-                "Target temprature could not exceed 100°C in souse vide mode."
-            )
+
+        target_temperature_celsius = None
+        target_temperature_fahrenheit = None
+
+        temperature_probe_celsius = None
+        temperature_probe_fahrenheit = None
+
+        match uot:
+            case AnovaUnitOfTemperature.CELSIUS:
+                if (
+                    target_temperature_celsius := call.data[
+                        "target_temperature_celsius"
+                    ]
+                ) is None:
+                    raise ValueError(
+                        "This service requires field Target temperature, please enter a valid value."
+                    )
+
+                target_temperature_fahrenheit = to_fahrenheit(
+                    target_temperature_celsius
+                )
+
+                if temperature_probe_celsius := call.data["temperature_probe_celsius"]:
+                    temperature_probe_fahrenheit = to_fahrenheit(
+                        temperature_probe_celsius
+                    )
+                if call.data["sous_vide"] and target_temperature_celsius > 100:
+                    raise ValueError(
+                        "Target temprature could not exceed 100°C in souse vide mode."
+                    )
+            case AnovaUnitOfTemperature.FAHRENHEIT:
+                if (
+                    target_temperature_fahrenheit := call.data.get(
+                        "target_temperature_fahrenheit"
+                    )
+                ) is None:
+                    raise ValueError(
+                        "This service requires field Target temperature, please enter a valid value."
+                    )
+                target_temperature_celsius = to_celsius(target_temperature_fahrenheit)
+
+                if temperature_probe_fahrenheit := call.data.get(
+                    "temperature_probe_fahrenheit"
+                ):
+                    temperature_probe_celsius = to_celsius(temperature_probe_fahrenheit)
+                if call.data["sous_vide"] and target_temperature_fahrenheit > 212:
+                    raise ValueError(
+                        "Target temprature could not exceed 212°F in souse vide mode."
+                    )
         preheat_stage = APOStage(
             step_type="stage",
             id=f"{PLATFORM}-{uuid.uuid4()}",
@@ -98,16 +161,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             temperature_bulbs=APOStage.TemperatureBulbs(
                 dry=APOStage.TemperatureBulb(
                     setpoint=APOStage.TemperatureSetpoint(
-                        celsius=call.data["target_temperature"],
-                        fahrenheit=to_fahrenheit(call.data["target_temperature"]),
+                        celsius=target_temperature_celsius,
+                        fahrenheit=target_temperature_fahrenheit,
                     )
                 )
                 if not call.data["sous_vide"]
                 else None,
                 wet=APOStage.TemperatureBulb(
                     setpoint=APOStage.TemperatureSetpoint(
-                        celsius=call.data["target_temperature"],
-                        fahrenheit=to_fahrenheit(call.data["target_temperature"]),
+                        celsius=target_temperature_celsius,
+                        fahrenheit=target_temperature_fahrenheit,
                     )
                 )
                 if call.data["sous_vide"]
@@ -130,14 +193,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     )
                 ),
             ),
-            probe_added=call.data.get("temperature_probe") is not None,
+            probe_added=temperature_probe_celsius is not None,
             temperature_probe=APOStage.Probe(
                 setpoint=APOStage.TemperatureSetpoint(
-                    celsius=call.data["temperature_probe"],
-                    fahrenheit=to_fahrenheit(call.data["temperature_probe"]),
+                    celsius=temperature_probe_celsius,
+                    fahrenheit=temperature_probe_fahrenheit,
                 )
             )
-            if call.data.get("temperature_probe")
+            if temperature_probe_celsius is not None
             else None,
             timer_added=timer is not None,
             timer=APOStage.Timer(
@@ -192,3 +255,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     return True
+
+
+async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Handle options update."""
+    await hass.config_entries.async_reload(entry.entry_id)

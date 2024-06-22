@@ -1,6 +1,6 @@
 """Dataclass models for the Anova integration."""
-from dataclasses import dataclass
 
+from dataclasses import dataclass
 
 # from .coordinator import AnovaCoordinator
 
