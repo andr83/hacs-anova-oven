@@ -15,21 +15,15 @@ jobs:
       contents: write
     steps:
       - name: "Checkout the repository"
-        uses: "actions/checkout@v4.1.0"
-
-      - name: "Adjust version number"
-        shell: "bash"
-        run: |
-          yq -i -o json '.version="${{ github.event.release.tag_name }}"' \
-            "${{ github.workspace }}/custom_components/anova_oven/manifest.json"
+        uses: "actions/checkout@v4.1.7"
 
       - name: "ZIP the integration directory"
         shell: "bash"
         run: |
-          cd "${{ github.workspace }}/custom_components/anova_oven"
-          zip anova_oven.zip -r ./
+          cd "${{ github.workspace }}/custom_components/integration_blueprint"
+          zip integration_blueprint.zip -r ./
 
       - name: "Upload the ZIP file to the release"
-        uses: softprops/action-gh-release@v0.1.15
+        uses: "softprops/action-gh-release@v2.0.5"
         with:
-          files: ${{ github.workspace }}/custom_components/anova_oven/anova_oven.zip
+          files: ${{ github.workspace }}/custom_components/integration_blueprint/integration_blueprint.zip
