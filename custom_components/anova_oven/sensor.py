@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from homeassistant import config_entries
 from homeassistant.components.climate.const import ClimateEntityFeature
@@ -34,6 +34,9 @@ class AnovaOvenSensorEntityDescriptionMixin:
     """Describes the mixin variables for anova sensors."""
 
     value_fn: Callable[[APOSensor], float | int | str]
+    extra_state_attributes: dict[str, Callable[[APOSensor], float | int | str]] = field(
+        default_factory=dict
+    )
 
 
 @dataclass(frozen=True)
@@ -57,7 +60,10 @@ def sensor_descriptions(
 
     return [
         AnovaOvenSensorEntityDescription(
-            key="mode", translation_key="mode", value_fn=lambda data: data.sensor.mode
+            key="mode",
+            translation_key="mode",
+            value_fn=lambda data: data.sensor.mode,
+            extra_state_attributes={"raw_stages": lambda s: s.raw_stages},
         ),
         # AnovaOvenSensorEntityDescription(
         #     key="bulb_mode",
@@ -73,6 +79,7 @@ def sensor_descriptions(
             value_fn=lambda data: temp_getter(
                 data.sensor.nodes.temperature_bulbs.temperature
             ),
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="target_temperature",
@@ -83,6 +90,7 @@ def sensor_descriptions(
             value_fn=lambda data: temp_getter(
                 data.sensor.nodes.temperature_bulbs.target_temperature
             ),
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="temperature_probe",
@@ -96,6 +104,7 @@ def sensor_descriptions(
             if data.sensor.nodes.temperature_probe
             and data.sensor.nodes.temperature_probe.temperature
             else None,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="target_temperature_probe",
@@ -109,6 +118,7 @@ def sensor_descriptions(
             if data.sensor.nodes.temperature_probe
             and data.sensor.nodes.temperature_probe.target_temperature
             else None,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="rear_watts",
@@ -117,6 +127,7 @@ def sensor_descriptions(
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="rear_watts",
             value_fn=lambda data: data.sensor.nodes.rear_heating.watts,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="bottom_watts",
@@ -125,6 +136,7 @@ def sensor_descriptions(
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="bottom_watts",
             value_fn=lambda data: data.sensor.nodes.bottom_heating.watts,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="top_watts",
@@ -133,6 +145,7 @@ def sensor_descriptions(
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="top_watts",
             value_fn=lambda data: data.sensor.nodes.top_heating.watts,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="fan_speed",
@@ -141,11 +154,13 @@ def sensor_descriptions(
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="fan_speed",
             value_fn=lambda data: data.sensor.nodes.fan_speed,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="steam_generator_mode",
             translation_key="steam_generator_mode",
             value_fn=lambda data: data.sensor.nodes.steam_generator.mode,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="relative_humidity",
@@ -154,6 +169,7 @@ def sensor_descriptions(
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="relative_humidity",
             value_fn=lambda data: data.sensor.nodes.steam_generator.relative_humidity,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="target_humidity",
@@ -162,6 +178,7 @@ def sensor_descriptions(
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="target_humidity",
             value_fn=lambda data: data.sensor.nodes.steam_generator.target_humidity,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="cook_time",
@@ -171,6 +188,7 @@ def sensor_descriptions(
             translation_key="cook_time",
             device_class=SensorDeviceClass.DURATION,
             value_fn=lambda data: data.sensor.nodes.cook.seconds_elapsed,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="timer",
@@ -180,6 +198,7 @@ def sensor_descriptions(
             translation_key="timer",
             device_class=SensorDeviceClass.DURATION,
             value_fn=lambda data: data.sensor.nodes.timer.current,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="timer_initial",
@@ -189,23 +208,27 @@ def sensor_descriptions(
             translation_key="timer_initial",
             device_class=SensorDeviceClass.DURATION,
             value_fn=lambda data: data.sensor.nodes.timer.initial,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="timer_mode",
             translation_key="timer_mode",
             value_fn=lambda data: data.sensor.nodes.timer.mode,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="active_stage",
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="active_stage",
             value_fn=lambda data: data.stages.active,
+            extra_state_attributes={},
         ),
         AnovaOvenSensorEntityDescription(
             key="stages_count",
             state_class=SensorStateClass.MEASUREMENT,
             translation_key="stages_count",
             value_fn=lambda data: data.stages.count,
+            extra_state_attributes={},
         ),
     ]
 
@@ -244,5 +267,8 @@ class AnovaOvenSensor(AnovaOvenDescriptionEntity, SensorEntity):
     def native_value(self) -> StateType:
         """Return the state."""
         if state := self.coordinator.devices[self.cooker_id].state:
+            if hasattr(self.entity_description, "extra_state_attributes"):
+                for k, getter in self.entity_description.extra_state_attributes.items():
+                    self._attr_extra_state_attributes[k] = getter(state)
             return self.entity_description.value_fn(state)
         return None

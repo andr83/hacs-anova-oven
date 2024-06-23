@@ -65,7 +65,6 @@ class AnovaOvenApi:
             async with self.session.ws_connect(url, headers=headers) as ws:
                 self._ws = ws
                 target: Target = None
-                target_was_fired: bool = False
                 async for msg in ws:
                     attempt = 0
                     if self._shold_stop:
@@ -93,6 +92,7 @@ class AnovaOvenApi:
                                         cook = state.get("cook", {})
                                         timer = nodes.get("timer", {})
                                         tp = nodes.get("temperatureProbe")
+                                        raw_stages = json.dumps(cook.get("stages", []))
 
                                         active_stage_index = None
                                         for idx, s in enumerate(
@@ -198,6 +198,7 @@ class AnovaOvenApi:
                                                 active=active_stage_index,
                                                 count=len(cook.get("stages", [])),
                                             ),
+                                            raw_stages=raw_stages,
                                         )
                                         device_id = payload["cookerId"]
                                         device = self.devices[device_id]
@@ -222,18 +223,15 @@ class AnovaOvenApi:
                                                 current=state.sensor.nodes.timer.current,
                                                 initial=state.sensor.nodes.timer.initial,
                                             )
-                                        if target != current_target:
-                                            target = current_target
-                                            target_was_fired = False
-                                        if (
-                                            not target_was_fired
-                                            and target
-                                            and target.reached
+                                        if target != current_target and (
+                                            (current_target and current_target.reached)
+                                            or current_target is None
                                         ):
                                             for listener in self._listeners:
                                                 await listener.on_target_reached(
                                                     device, target
                                                 )
+                                        target = current_target
                                     case "EVENT_APO_WIFI_LIST":
                                         payload = data.get("payload")
                                         new_devices: list[tuple[str, str]] = [

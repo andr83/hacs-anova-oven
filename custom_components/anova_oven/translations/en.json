@@ -167,6 +167,20 @@
             },
             "name": "Start cooking"
         },
+        "start_custom_cook": {
+            "description": "Start cooking based on raw configuration for the Anova server.",
+            "fields": {
+                "config": {
+                    "description": "Raw configuration. You can take config from current cooking to reuse from 'raw_stages' attribute on Mode sensor.",
+                    "name": "Config"
+                },
+                "device_id": {
+                    "description": "Id of the device.",
+                    "name": "Device ID"
+                }
+            },
+            "name": "Start custom cooking"
+        },
         "stop_cook": {
             "description": "Stop cooking all stages.",
             "fields": {

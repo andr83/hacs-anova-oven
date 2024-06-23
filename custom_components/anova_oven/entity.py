@@ -47,3 +47,7 @@ class AnovaOvenDescriptionEntity(AnovaOvenEntity):
         super().__init__(cooker_id, coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{self.cooker_id}_{description.key}"
+        if hasattr(description, "extra_state_attributes"):
+            self._attr_extra_state_attributes = {
+                k: None for k in description.extra_state_attributes
+            }

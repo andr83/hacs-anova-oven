@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 import uuid
 
 from homeassistant.config_entries import ConfigEntry
@@ -28,7 +29,7 @@ from .const import (
 )
 from .coordinator import AnovaCoordinator
 from .precision_oven import AnovaPrecisionOven, APOCommand, APOStage
-from .util import to_celsius, to_fahrenheit
+from .util import to_celsius, to_fahrenheit, dict_keys_to_snake_case
 
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR]
 
@@ -112,7 +113,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         temperature_probe_celsius = None
         temperature_probe_fahrenheit = None
 
-        preheat_required = False
+        preheat_required = False  # not (temperature_probe_celsius or timer)
         user_action_required = False
 
         match call.data.get("timer_mode"):
@@ -208,11 +209,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 if sous_vide
                 else None,
                 steam_percentage=APOStage.SteamGenerators.Setpoint(
-                    setpoint=call.data.get("target_humidity")
+                    setpoint=call.data.get("target_humidity", 0)
                 )
                 if not sous_vide
                 else None,
-            ),
+            )
+            if call.data.get("target_humidity") or sous_vide
+            else None,
             probe_added=temperature_probe_celsius is not None,
             temperature_probe=APOStage.Probe(
                 setpoint=APOStage.TemperatureSetpoint(
@@ -254,6 +257,27 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
         )
 
+    async def start_custom_cook(call: ServiceCall):
+        cook_id, api = get_api(call.data[ATTR_DEVICE_ID])
+        config = call.data.get("config")
+        stages = [
+            APOStage(**dict_keys_to_snake_case(data)) for data in json.loads(config)
+        ]
+        await api.send_command(
+            APOCommand(
+                command="CMD_APO_START",
+                request_id=str(uuid.uuid4()),
+                payload=APOCommand.Payload(
+                    payload=APOCommand.APOStartPayload(
+                        cook_id=f"{PLATFORM}-{uuid.uuid4()}",
+                        stages=stages,
+                    ),
+                    type="CMD_APO_START",
+                    id=cook_id,
+                ),
+            )
+        )
+
     async def stop_cook(call: ServiceCall):
         api: AnovaOvenApi
         cook_id, api = get_api(call.data[ATTR_DEVICE_ID])
@@ -271,6 +295,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         DOMAIN,
         "start_cook",
         start_cook,
+    )
+
+    hass.services.async_register(
+        DOMAIN,
+        "start_custom_cook",
+        start_custom_cook,
     )
 
     hass.services.async_register(

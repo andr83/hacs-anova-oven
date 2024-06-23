@@ -8,6 +8,11 @@ def snake_case_to_camel_case(input_string):
     return "".join(camel_case_words)
 
 
+def camel_to_snake(name):
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+
 def dict_keys_to_camel_case(data: dict):
     res = {}
     for k, v in data.items():
@@ -16,6 +21,17 @@ def dict_keys_to_camel_case(data: dict):
         elif isinstance(v, list):
             v = [dict_keys_to_camel_case(x) for x in v]
         res[snake_case_to_camel_case(k)] = v
+    return res
+
+
+def dict_keys_to_snake_case(data: dict):
+    res = {}
+    for k, v in data.items():
+        if isinstance(v, dict):
+            v = dict_keys_to_snake_case(v)
+        elif isinstance(v, list):
+            v = [dict_keys_to_snake_case(x) for x in v]
+        res[camel_to_snake(k)] = v
     return res
 
 

@@ -89,6 +89,7 @@ class APOState:
 
     sensor: APOSensor
     stages: Stages
+    raw_stages: str
 
 
 class Target:
@@ -182,18 +183,18 @@ class APOStage:
         relative_humidity: Setpoint
         steam_percentage: Setpoint
 
-    step_type: str
     id: str
     title: str
-    description: str
     type: str
-    user_action_required: bool
     temperature_bulbs: TemperatureBulbs
     heating_elements: HeatingElements
     fan: Fan
     vent: Vent
-    rack_position: int
-    steam_generators: SteamGenerators
+    step_type: str = "stage"
+    description: str = ""
+    user_action_required: bool = False
+    rack_position: int = 3
+    steam_generators: SteamGenerators | None = None
     timer_added: bool = False
     timer: Timer | None = None
     probe_added: bool = False
