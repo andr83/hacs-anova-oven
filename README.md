@@ -18,7 +18,11 @@ Services
 
 1. Start cooking
     ![Screenshot](images/Service_Start_Cook.png)
-2. Stop cooking
+2. Start custom cooking
+    ![Screenshot](images/Service_Start_Custom_Cook.png)
+    You can obtain the raw configuration from the “raw_stages” attribute in the “Mode” sensor. 
+    This attribute will contain the raw configuration for the currently running cook.
+3. Stop cooking
     ![Screenshot](images/Service_Stop_Cook.png)
 
 Events
