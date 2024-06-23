@@ -180,6 +180,7 @@ class APOStage:
 
         mode: str
         relative_humidity: Setpoint
+        steam_percentage: Setpoint
 
     step_type: str
     id: str
