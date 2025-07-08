@@ -1,195 +1,220 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "access_token": "Access token",
-                    "app_key": "API key",
-                    "refresh_token": "Refresh token",
-                    "temperature_unit": "Temperature unit"
-                }
-            }
-        }
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured"
     },
-    "device_automation": {
-        "trigger_type": {
-            "cook_target_reached": "Cook target reached"
-        }
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error"
     },
-    "entity": {
-        "binary_sensor": {
-            "door_closed": {
-                "name": "Door closed"
-            },
-            "lamp_on": {
-                "name": "Lamp on"
-            },
-            "sous_vide": {
-                "name": "Sous vide"
-            },
-            "water_tank_empty": {
-                "name": "Water tank empty"
-            }
-        },
-        "sensor": {
-            "active_stage": {
-                "name": "Active stage"
-            },
-            "bottom_watts": {
-                "name": "Bottom watts"
-            },
-            "bulb_mode": {
-                "name": "Bulb mode"
-            },
-            "cook_time": {
-                "name": "Cook time"
-            },
-            "fan_speed": {
-                "name": "Fan speed"
-            },
-            "mode": {
-                "name": "Mode"
-            },
-            "rear_watts": {
-                "name": "Rear watts"
-            },
-            "relative_humidity": {
-                "name": "Humidity"
-            },
-            "stages_count": {
-                "name": "Stages count"
-            },
-            "steam_generator_mode": {
-                "name": "Steam generator mode"
-            },
-            "target_humidity": {
-                "name": "Target humidity"
-            },
-            "target_temperature": {
-                "name": "Target temperature"
-            },
-            "target_temperature_probe": {
-                "name": "Target probe"
-            },
-            "temperature": {
-                "name": "Temperature"
-            },
-            "temperature_probe": {
-                "name": "Probe"
-            },
-            "timer": {
-                "name": "Timer"
-            },
-            "timer_initial": {
-                "name": "Timer initial"
-            },
-            "timer_mode": {
-                "name": "Timer mode"
-            },
-            "top_watts": {
-                "name": "Top watts"
-            }
+    "step": {
+      "user": {
+        "data": {
+          "access_token": "Access token",
+          "app_key": "API key",
+          "refresh_token": "Refresh token",
+          "temperature_unit": "Temperature unit"
         }
-    },
-    "options": {
-        "step": {
-            "init": {
-                "data": {
-                    "access_token": "Access token",
-                    "app_key": "API key",
-                    "refresh_token": "Refresh token",
-                    "temperature_unit": "Temperature unit"
-                },
-                "title": "Configure Anova Oven"
-            }
-        }
-    },
-    "services": {
-        "start_cook": {
-            "description": "Configure cooking and start it.",
-            "fields": {
-                "device_id": {
-                    "description": "Id of the device.",
-                    "name": "Device ID"
-                },
-                "heating_bottom": {
-                    "description": "Enable bottom section heating.",
-                    "name": "Heat bottom"
-                },
-                "heating_rear": {
-                    "description": "Enable rear section heating.",
-                    "name": "Heat rear"
-                },
-                "heating_top": {
-                    "description": "Enable top section heating.",
-                    "name": "Heat top"
-                },
-                "sous_vide": {
-                    "description": "Enable low temperature cooking mode.",
-                    "name": "Sous vide"
-                },
-                "target_humidity": {
-                    "description": "Targer humidity.",
-                    "name": "Humidity"
-                },
-                "target_temperature_celsius": {
-                    "description": "Target temperature. For souce vide mode it limits to 100\u00b0C",
-                    "name": "Temperature"
-                },
-                "target_temperature_fahrenheit": {
-                    "description": "Target temperature. For souce vide mode it limits to 212\u00b0F",
-                    "name": "Temperature"
-                },
-                "temperature_probe_celsius": {
-                    "description": "Probe temperature. Can not be used togerther with the timer.",
-                    "name": "Probe"
-                },
-                "temperature_probe_fahrenheit": {
-                    "description": "Probe temperature. Can not be used togerther with the timer.",
-                    "name": "Probe"
-                },
-                "timer": {
-                    "description": "Cooking timer. Can not be used togerther with the probe.",
-                    "name": "Timer"
-                },
-                "timer_mode": {
-                    "description": "When cooking timer starts.",
-                    "name": "Timer starts"
-                }
-            },
-            "name": "Start cooking"
-        },
-        "start_custom_cook": {
-            "description": "Start cooking based on raw configuration for the Anova server.",
-            "fields": {
-                "config": {
-                    "description": "Raw configuration. You can take config from current cooking to reuse from 'raw_stages' attribute on Mode sensor.",
-                    "name": "Config"
-                },
-                "device_id": {
-                    "description": "Id of the device.",
-                    "name": "Device ID"
-                }
-            },
-            "name": "Start custom cooking"
-        },
-        "stop_cook": {
-            "description": "Stop cooking all stages.",
-            "fields": {
-                "device_id": {
-                    "description": "Id of the device.",
-                    "name": "Device ID"
-                }
-            },
-            "name": "Stop cooking"
-        }
+      }
     }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cook_target_reached": "Cook target reached"
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "door_closed": {
+        "name": "Door closed"
+      },
+      "lamp_on": {
+        "name": "Lamp on"
+      },
+      "sous_vide": {
+        "name": "Sous vide"
+      },
+      "water_tank_empty": {
+        "name": "Water tank empty"
+      }
+    },
+    "sensor": {
+      "active_stage": {
+        "name": "Active stage"
+      },
+      "bottom_watts": {
+        "name": "Bottom watts"
+      },
+      "exhaust_vent": {
+        "name": "Exhaust Vent"
+      },
+      "boiler_watts": {
+        "name": "Boiler watts"
+      },
+      "evaporator_watts": {
+        "name": "Evaporator watts"
+      },
+      "boiler_usageHours": {
+        "name": "Boiler Usage Hours"
+      },
+      "evaporator_usageHours": {
+        "name": "Evaporator Usage Hours"
+      },
+      "top_usageHours": {
+        "name": "Top Usage Hours"
+      },
+      "rear_usageHours": {
+        "name": "Rear Usage Hours"
+      },
+      "bottom_usageHours": {
+        "name": "Bottom Usage Hours"
+      },
+      "cook_time": {
+        "name": "Cook time"
+      },
+      "fan_speed": {
+        "name": "Fan speed"
+      },
+      "mode": {
+        "name": "Mode"
+      },
+      "rear_watts": {
+        "name": "Rear watts"
+      },
+      "relative_humidity": {
+        "name": "Humidity"
+      },
+      "stages_count": {
+        "name": "Stages count"
+      },
+      "steam_generator_mode": {
+        "name": "Steam generator mode"
+      },
+      "target_humidity": {
+        "name": "Target humidity"
+      },
+      "target_temperature": {
+        "name": "Target temperature"
+      },
+      "target_temperature_probe": {
+        "name": "Target probe"
+      },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "temperature_probe": {
+        "name": "Probe"
+      },
+      "timer": {
+        "name": "Timer"
+      },
+      "timer_initial": {
+        "name": "Timer initial"
+      },
+      "timer_mode": {
+        "name": "Timer mode"
+      },
+      "top_watts": {
+        "name": "Top watts"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "access_token": "Access token",
+          "app_key": "API key",
+          "refresh_token": "Refresh token",
+          "temperature_unit": "Temperature unit"
+        },
+        "title": "Configure Anova Oven"
+      }
+    }
+  },
+  "services": {
+    "start_cook": {
+      "description": "Configure cooking and start it.",
+      "fields": {
+        "device_id": {
+          "description": "Id of the device.",
+          "name": "Device ID"
+        },
+        "heating_bottom": {
+          "description": "Enable bottom section heating.",
+          "name": "Heat bottom"
+        },
+        "heating_rear": {
+          "description": "Enable rear section heating.",
+          "name": "Heat rear"
+        },
+        "heating_top": {
+          "description": "Enable top section heating.",
+          "name": "Heat top"
+        },
+        "sous_vide": {
+          "description": "Enable low temperature cooking mode.",
+          "name": "Sous vide"
+        },
+        "target_humidity": {
+          "description": "Targer humidity.",
+          "name": "Humidity"
+        },
+        "title": {
+          "name": "Title",
+          "description": "Title of the step."
+        },
+        "target_temperature_celsius": {
+          "description": "Target temperature. For souce vide mode it limits to 100\u00b0C",
+          "name": "Temperature"
+        },
+        "target_temperature_fahrenheit": {
+          "description": "Target temperature. For souce vide mode it limits to 212\u00b0F",
+          "name": "Temperature"
+        },
+        "temperature_probe_celsius": {
+          "description": "Probe temperature. Can not be used togerther with the timer.",
+          "name": "Probe"
+        },
+        "temperature_probe_fahrenheit": {
+          "description": "Probe temperature. Can not be used togerther with the timer.",
+          "name": "Probe"
+        },
+        "timer": {
+          "description": "Cooking timer. Can not be used togerther with the probe.",
+          "name": "Timer"
+        },
+        "timer_mode": {
+          "description": "When cooking timer starts.",
+          "name": "Timer starts"
+        }
+      },
+      "name": "Start cooking"
+    },
+    "start_custom_cook": {
+      "description": "Start cooking based on raw configuration for the Anova server.",
+      "fields": {
+        "config": {
+          "description": "Raw configuration. You can take config from current cooking to reuse from 'raw_stages' attribute on Mode sensor.",
+          "name": "Config"
+        },
+        "device_id": {
+          "description": "Id of the device.",
+          "name": "Device ID"
+        }
+      },
+      "name": "Start custom cooking"
+    },
+    "stop_cook": {
+      "description": "Stop cooking all stages.",
+      "fields": {
+        "device_id": {
+          "description": "Id of the device.",
+          "name": "Device ID"
+        }
+      },
+      "name": "Stop cooking"
+    }
+  }
 }

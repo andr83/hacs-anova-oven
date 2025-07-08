@@ -27,9 +27,7 @@ TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
 )
 
 
-async def async_get_triggers(
-    hass: HomeAssistant, device_id: str
-) -> list[dict[str, str]]:
+async def async_get_triggers(hass: HomeAssistant, device_id: str) -> list[dict[str, str]]:
     triggers = []
 
     triggers.append(
@@ -60,6 +58,4 @@ async def async_attach_trigger(
             },
         }
     )
-    return await event_trigger.async_attach_trigger(
-        hass, event_config, action, trigger_info, platform_type=CONF_DEVICE
-    )
+    return await event_trigger.async_attach_trigger(hass, event_config, action, trigger_info, platform_type=CONF_DEVICE)

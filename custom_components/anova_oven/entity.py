@@ -28,9 +28,7 @@ class AnovaOvenEntity(CoordinatorEntity[AnovaCoordinator], Entity):
                 name="Anova Precision Oven",
                 manufacturer="Anova",
                 model="Precision Oven",
-                sw_version=device.state.sensor.firmware_version
-                if device.state
-                else "0.0.0",
+                sw_version=device.state.sensor.firmware_version if device.state else "0.0.0",
             )
 
 
@@ -48,6 +46,4 @@ class AnovaOvenDescriptionEntity(AnovaOvenEntity):
         self.entity_description = description
         self._attr_unique_id = f"{self.cooker_id}_{description.key}"
         if hasattr(description, "extra_state_attributes"):
-            self._attr_extra_state_attributes = {
-                k: None for k in description.extra_state_attributes
-            }
+            self._attr_extra_state_attributes = {k: None for k in description.extra_state_attributes}

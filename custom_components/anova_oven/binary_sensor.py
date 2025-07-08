@@ -35,9 +35,7 @@ class AnovaOvenBinarySensorEntityDescriptionMixin:
 
 
 @dataclass(frozen=True)
-class AnovaOvenBinarySensorEntityDescription(
-    SensorEntityDescription, AnovaOvenBinarySensorEntityDescriptionMixin
-):
+class AnovaOvenBinarySensorEntityDescription(SensorEntityDescription, AnovaOvenBinarySensorEntityDescriptionMixin):
     """Describes a Anova binary sensor."""
 
 

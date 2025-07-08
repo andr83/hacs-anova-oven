@@ -7,9 +7,14 @@ start_cook:
           integration: anova_oven
     sous_vide:
       required: false
-      default: false
+      default:
       selector:
         boolean:
+    title:
+      required: false
+      default:
+      selector:
+        text:
     target_temperature_celsius:
       required: false
       selector:
@@ -86,6 +91,8 @@ start_cook:
             - Immediately
             - When Preheated
             - Manually
+            - When Food Detected
+            - When Food Removed
 
 start_custom_cook:
   fields:

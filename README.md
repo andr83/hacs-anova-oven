@@ -1,9 +1,7 @@
-# Anova Oven HA integration
+> [!IMPORTANT]
+> This fork contains currently code to make it work on the Anova Precision Oven 2.0. If you are interested in the version 1, head to the original repository instead.
 
-[![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE)
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
+# Anova Oven HA integration
 
 This integration relies on the reverse engineering of the Anova Precision Oven WebSocket API as implemented in [this](https://github.com/bogd/anova-oven-api/tree/main) project.
 
@@ -69,14 +67,3 @@ If you want to change the display format of sensors, you can do it manually for 
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
-
-***
-
-[buymecoffee]: https://www.buymeacoffee.com/andr83
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/andr83/hacs-anova-oven.svg?style=for-the-badge
-[commits]: https://github.com/andr83/hacs-anova-oven/commits/main
-[license-shield]: https://img.shields.io/github/license/andr83/hacs-anova-oven.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/v/release/andr83/hacs-anova-oven.svg?style=for-the-badge
-[releases]: https://github.com/andr83/hacs-anova-oven/releases
-[hacs]: https://hacs.xyz

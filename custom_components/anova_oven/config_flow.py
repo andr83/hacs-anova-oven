@@ -31,17 +31,17 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_APP_KEY): str,
         vol.Required(CONF_ACCESS_TOKEN): str,
         vol.Required(CONF_REFRESH_TOKEN): str,
-        vol.Required(
-            CONF_TEMPERATURE_UNIT, default=AnovaUnitOfTemperature.CELSIUS
-        ): vol.All(vol.Coerce(str), vol.In([e.value for e in AnovaUnitOfTemperature])),
+        vol.Required(CONF_TEMPERATURE_UNIT, default=AnovaUnitOfTemperature.CELSIUS): vol.All(
+            vol.Coerce(str), vol.In([e.value for e in AnovaUnitOfTemperature])
+        ),
     }
 )
 
 STEP_OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Optional(
-            CONF_TEMPERATURE_UNIT, default=AnovaUnitOfTemperature.CELSIUS
-        ): vol.All(vol.Coerce(str), vol.In([e.value for e in AnovaUnitOfTemperature])),
+        vol.Optional(CONF_TEMPERATURE_UNIT, default=AnovaUnitOfTemperature.CELSIUS): vol.All(
+            vol.Coerce(str), vol.In([e.value for e in AnovaUnitOfTemperature])
+        ),
     }
 )
 
@@ -79,9 +79,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
@@ -110,9 +108,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     },
                 )
 
-        return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
-        )
+        return self.async_show_form(step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors)
 
     @staticmethod
     @callback
@@ -124,9 +120,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class AnovaOvenOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
             entry = self.async_create_entry(title="", data=user_input)
@@ -134,9 +128,7 @@ class AnovaOvenOptionsFlowHandler(config_entries.OptionsFlowWithConfigEntry):
 
         return self.async_show_form(
             step_id="init",
-            data_schema=self.add_suggested_values_to_schema(
-                STEP_OPTIONS_SCHEMA, self.config_entry.options
-            ),
+            data_schema=self.add_suggested_values_to_schema(STEP_OPTIONS_SCHEMA, self.config_entry.options),
         )
 
 

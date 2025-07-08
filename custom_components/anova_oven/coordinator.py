@@ -66,8 +66,7 @@ class AnovaCoordinator(DataUpdateCoordinator[APOState], AnovaOvenUpdateListener)
     async def on_new_token(self, access_token: str, refresh_token: str):
         self.hass.config_entries.async_update_entry(
             entry=self.entry,
-            data=self.entry.data
-            | {CONF_ACCESS_TOKEN: access_token, CONF_REFRESH_TOKEN: refresh_token},
+            data=self.entry.data | {CONF_ACCESS_TOKEN: access_token, CONF_REFRESH_TOKEN: refresh_token},
         )
         self.entry = self.hass.config_entries.async_get_entry(self.entry.entry_id)
 

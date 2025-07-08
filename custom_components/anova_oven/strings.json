@@ -37,8 +37,8 @@
       "mode": {
         "name": "Mode"
       },
-      "bulb_mode": {
-        "name": "Bulb mode"
+      "exhaust_vent": {
+        "name": "Exhaust Vent"
       },
       "temperature": {
         "name": "Temperature"
@@ -51,6 +51,12 @@
       },
       "target_temperature_probe": {
         "name": "Target probe"
+      },
+      "boiler_watts": {
+        "name": "Boiler watts"
+      },
+      "evaporator_watts": {
+        "name": "Evaporator watts"
       },
       "rear_watts": {
         "name": "Rear watts"
@@ -75,6 +81,21 @@
       },
       "cook_time": {
         "name": "Cook time"
+      },
+      "boiler_usageHours": {
+        "name": "Boiler Usage Hours"
+      },
+      "evaporator_usageHours": {
+        "name": "Evaporator Usage Hours"
+      },
+      "top_usageHours": {
+        "name": "Top Usage Hours"
+      },
+      "rear_usageHours": {
+        "name": "Rear Usage Hours"
+      },
+      "bottom_usageHours": {
+        "name": "Bottom Usage Hours"
       },
       "timer": {
         "name": "Timer"
@@ -115,6 +136,10 @@
         "device_id": {
           "name": "Device ID",
           "description": "Id of the device."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Title of the step."
         },
         "sous_vide": {
           "name": "Sous vide",

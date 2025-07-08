@@ -1,11 +1,10 @@
 """The Anova Precision Oven integration."""
 
 from __future__ import annotations
+from typing import Any
 
-import dataclasses
 import json
 import uuid
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_DEVICE_ID,
@@ -54,9 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         access_token=data[CONF_ACCESS_TOKEN],
         refresh_token=data[CONF_REFRESH_TOKEN],
         existing_devices=devices,
-        unit_of_temperature=data.get(
-            CONF_TEMPERATURE_UNIT, AnovaUnitOfTemperature.CELSIUS
-        ),
+        unit_of_temperature=data.get(CONF_TEMPERATURE_UNIT, AnovaUnitOfTemperature.CELSIUS),
     )
     coordinator = AnovaCoordinator(api=api, hass=hass, entry=entry, devices=devices)
     await coordinator.async_setup()
@@ -113,141 +110,117 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         temperature_probe_celsius = None
         temperature_probe_fahrenheit = None
 
-        preheat_required = False  # not (temperature_probe_celsius or timer)
+        immediately = False
         user_action_required = False
+        food_detected = False
+        food_removed = False
 
+        conditions = {}
         match call.data.get("timer_mode"):
             case "When Preheated":
-                preheat_required = True
+                conditions[f"nodes.temperatureBulbs.{mode}.current.celsius"] = {">=": target_temperature_celsius}
             case "Manually":
-                preheat_required = True
-                user_action_required = True
+                conditions["userAction"] = {"=": True}
+            case "When Food Detected":
+                conditions["nodes.cavityCamera.isEmpty" : {"=": False}]
+                conditions["userAction"] = {"=": True}
+            case "When Food Removed":
+                conditions["nodes.cavityCamera.isEmpty" : {"=": True}]
+                conditions["userAction"] = {"=": True}
 
         match uot:
             case AnovaUnitOfTemperature.CELSIUS:
-                if (
-                    target_temperature_celsius := call.data.get(
-                        "target_temperature_celsius"
-                    )
-                ) is None:
-                    raise ValueError(
-                        "This service requires field Target temperature, please enter a valid value."
-                    )
+                if (target_temperature_celsius := call.data.get("target_temperature_celsius")) is None:
+                    raise ValueError("This service requires field Target temperature, please enter a valid value.")
 
-                target_temperature_fahrenheit = to_fahrenheit(
-                    target_temperature_celsius
-                )
+                target_temperature_fahrenheit = to_fahrenheit(target_temperature_celsius)
 
-                if temperature_probe_celsius := call.data.get(
-                    "temperature_probe_celsius"
-                ):
-                    temperature_probe_fahrenheit = to_fahrenheit(
-                        temperature_probe_celsius
-                    )
+                if temperature_probe_celsius := call.data.get("temperature_probe_celsius"):
+                    temperature_probe_fahrenheit = to_fahrenheit(temperature_probe_celsius)
                 if sous_vide and target_temperature_celsius > 100:
-                    raise ValueError(
-                        "Target temprature could not exceed 100°C in souse vide mode."
-                    )
+                    raise ValueError("Target temprature could not exceed 100°C in souse vide mode.")
             case AnovaUnitOfTemperature.FAHRENHEIT:
-                if (
-                    target_temperature_fahrenheit := call.data.get(
-                        "target_temperature_fahrenheit"
-                    )
-                ) is None:
-                    raise ValueError(
-                        "This service requires field Target temperature, please enter a valid value."
-                    )
+                if (target_temperature_fahrenheit := call.data.get("target_temperature_fahrenheit")) is None:
+                    raise ValueError("This service requires field Target temperature, please enter a valid value.")
                 target_temperature_celsius = to_celsius(target_temperature_fahrenheit)
 
-                if temperature_probe_fahrenheit := call.data.get(
-                    "temperature_probe_fahrenheit"
-                ):
+                if temperature_probe_fahrenheit := call.data.get("temperature_probe_fahrenheit"):
                     temperature_probe_celsius = to_celsius(temperature_probe_fahrenheit)
                 if sous_vide and target_temperature_fahrenheit > 212:
-                    raise ValueError(
-                        "Target temprature could not exceed 212°F in souse vide mode."
-                    )
-        preheat_stage = APOStage(
-            step_type="stage",
+                    raise ValueError("Target temprature could not exceed 212°F in souse vide mode.")
+        mode = "wet" if sous_vide else "dry"
+
+        stage = APOStage(
             id=f"{PLATFORM}-{uuid.uuid4()}",
-            title="",
+            title=call.data.get("title"),
             description="",
-            type="preheat",
-            user_action_required=user_action_required,
-            temperature_bulbs=APOStage.TemperatureBulbs(
-                dry=APOStage.TemperatureBulb(
+            exit={"conditions": {"and": {"nodes.timer.mode": {"=": "completed"}}}} if timer else {"conditions": {"and":{}}},
+            do=APOStage.Action(
+                type="cook",
+                timer=APOStage.Timer(
+                    initial=timer["hours"] * 3600 + timer["minutes"] * 60 + timer["seconds"],
+                    entry={"conditions": {"or": conditions}},
+                )
+                if timer
+                else None,
+                temperature_bulbs=APOStage.TemperatureBulbs(
+                    dry=APOStage.TemperatureBulb(
+                        setpoint=APOStage.TemperatureSetpoint(celsius=target_temperature_celsius)
+                    )
+                    if not sous_vide
+                    else None,
+                    wet=APOStage.TemperatureBulb(
+                        setpoint=APOStage.TemperatureSetpoint(celsius=target_temperature_celsius)
+                    )
+                    if sous_vide
+                    else None,
+                    mode=mode,
+                ),
+                heating_elements=APOStage.HeatingElements(
+                    bottom=APOStage.On(on=call.data.get("heating_bottom", False)),
+                    top=APOStage.On(on=call.data.get("heating_top", False)),
+                    rear=APOStage.On(on=call.data.get("heating_rear", True)),
+                ),
+                fan=APOStage.Fan(speed=100),
+                exhaust_vent=APOStage.Vent(state="closed"),
+                steam_generators=APOStage.SteamGenerators(
+                    mode="relative-humidity" if sous_vide else "steam-percentage",
+                    relative_humidity=APOStage.SteamGenerators.Setpoint(
+                        setpoint=call.data.get("target_humidity", 100 if sous_vide else 0)
+                    )
+                    if sous_vide
+                    else None,
+                    steam_percentage=APOStage.SteamGenerators.Setpoint(setpoint=call.data.get("target_humidity", 0))
+                    if not sous_vide
+                    else None,
+                )
+                if call.data.get("target_humidity") or sous_vide
+                else None,
+                temperature_probe=APOStage.Probe(
                     setpoint=APOStage.TemperatureSetpoint(
-                        celsius=target_temperature_celsius,
-                        fahrenheit=target_temperature_fahrenheit,
+                        celsius=temperature_probe_celsius,
+                        fahrenheit=temperature_probe_fahrenheit,
                     )
                 )
-                if not sous_vide
+                if temperature_probe_celsius is not None
                 else None,
-                wet=APOStage.TemperatureBulb(
-                    setpoint=APOStage.TemperatureSetpoint(
-                        celsius=target_temperature_celsius,
-                        fahrenheit=target_temperature_fahrenheit,
-                    )
-                )
-                if sous_vide
-                else None,
-                mode="wet" if sous_vide else "dry",
             ),
-            heating_elements=APOStage.HeatingElements(
-                bottom=APOStage.On(on=call.data.get("heating_bottom", False)),
-                top=APOStage.On(on=call.data.get("heating_top", False)),
-                rear=APOStage.On(on=call.data.get("heating_rear", True)),
-            ),
-            fan=APOStage.Fan(speed=100),
-            vent=APOStage.Vent(open=False),
-            rack_position=3,
-            steam_generators=APOStage.SteamGenerators(
-                mode="relative-humidity" if sous_vide else "steam-percentage",
-                relative_humidity=APOStage.SteamGenerators.Setpoint(
-                    setpoint=call.data.get("target_humidity", 100 if sous_vide else 0)
-                )
-                if sous_vide
-                else None,
-                steam_percentage=APOStage.SteamGenerators.Setpoint(
-                    setpoint=call.data.get("target_humidity", 0)
-                )
-                if not sous_vide
-                else None,
-            )
-            if call.data.get("target_humidity") or sous_vide
-            else None,
-            probe_added=temperature_probe_celsius is not None,
-            temperature_probe=APOStage.Probe(
-                setpoint=APOStage.TemperatureSetpoint(
-                    celsius=temperature_probe_celsius,
-                    fahrenheit=temperature_probe_fahrenheit,
-                )
-            )
-            if temperature_probe_celsius is not None
-            else None,
         )
-        cook_stage = dataclasses.replace(
-            preheat_stage,
-            id=f"{PLATFORM}-{uuid.uuid4()}",
-            type="cook",
-            user_action_required=user_action_required,
-            timer_added=timer is not None,
-            timer=APOStage.Timer(
-                initial=timer["hours"] * 3600 + timer["minutes"] * 60 + timer["seconds"]
-            )
-            if timer
-            else None,
-        )
+
         stages = []
-        if preheat_required:
-            stages.append(preheat_stage)
-        stages.append(cook_stage)
+        stages.append(stage)
+
         await api.send_command(
             APOCommand(
                 command="CMD_APO_START",
                 request_id=str(uuid.uuid4()),
                 payload=APOCommand.Payload(
                     payload=APOCommand.APOStartPayload(
+                        type="oven_v2",
+                        cookable_type="manual",
+                        origin_source="android",
+                        cooker_id=cook_id,
+                        title=call.data.get("title"),
                         cook_id=f"{PLATFORM}-{uuid.uuid4()}",
                         stages=stages,
                     ),
@@ -260,15 +233,18 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async def start_custom_cook(call: ServiceCall):
         cook_id, api = get_api(call.data[ATTR_DEVICE_ID])
         config = call.data.get("config")
-        stages = [
-            APOStage(**dict_keys_to_snake_case(data)) for data in json.loads(config)
-        ]
+        stages = [APOStage(**dict_keys_to_snake_case(data)) for data in json.loads(config)]
         await api.send_command(
             APOCommand(
                 command="CMD_APO_START",
                 request_id=str(uuid.uuid4()),
                 payload=APOCommand.Payload(
                     payload=APOCommand.APOStartPayload(
+                        type="oven_v2",
+                        cookable_type="manual",
+                        origin_source="android",
+                        cooker_id=cook_id,
+                        title="Custom stages",
                         cook_id=f"{PLATFORM}-{uuid.uuid4()}",
                         stages=stages,
                     ),
@@ -285,9 +261,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             APOCommand(
                 command="CMD_APO_STOP",
                 request_id=str(uuid.uuid4()),
-                payload=APOCommand.Payload(
-                    type="CMD_APO_STOP", id=cook_id, payload=None
-                ),
+                payload=APOCommand.Payload(type="CMD_APO_STOP", id=cook_id, payload=None),
             )
         )
 
@@ -310,6 +284,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     return True
+
+
+async def async_get_device_diagnostics(
+    hass: HomeAssistant, entry: ConfigEntry, device: AnovaPrecisionOven
+) -> dict[str, Any]:
+    return device.raw_data
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:

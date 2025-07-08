@@ -1,18 +1,8 @@
 import logging
 from dataclasses import dataclass
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, TypeVar, Literal, Any
 
 _LOGGER = logging.getLogger(__name__)
-
-
-MODE_MAP = {"IDLE": "Idle", "COOK": "Cook", "LOW WATER": "Low water"}
-
-STATE_MAP = {
-    "PREHEATING": "Preheating",
-    "COOKING": "Cooking",
-    "MAINTAINING": "Maintaining",
-    "": "No state",
-}
 
 P = TypeVar("P")
 
@@ -44,12 +34,18 @@ class APOSensor:
         class HeatingElement:
             watts: int
             on: bool
+            usage_hours: int
 
         @dataclass
         class SteamGenerator:
             mode: str
             relative_humidity: int
             target_humidity: int
+
+        @dataclass
+        class SteamGeneratorType:
+            watts: int
+            usage_hours: int
 
         @dataclass
         class Cook:
@@ -66,6 +62,8 @@ class APOSensor:
         temperature_bulbs: TemperatureBulbs
         temperature_probe: TemperatureProbe
         steam_generator: SteamGenerator
+        evaporator: SteamGeneratorType
+        boiler: SteamGeneratorType
         rear_heating: HeatingElement
         bottom_heating: HeatingElement
         top_heating: HeatingElement
@@ -106,9 +104,7 @@ class ProbeTarget(Target):
     @property
     def reached(self) -> bool:
         return (
-            self.temperature
-            and self.target_temperature
-            and self.temperature.celsius >= self.target_temperature.celsius
+            self.temperature and self.target_temperature and self.temperature.celsius >= self.target_temperature.celsius
         )
 
 
@@ -123,6 +119,8 @@ class TimerTarget(Target):
 
 
 class AnovaPrecisionOven:
+    raw_data: Any
+
     def __init__(self, cooker_id: str, type: str) -> None:
         self.cooker_id = cooker_id
         self.type = type
@@ -134,7 +132,6 @@ class AnovaPrecisionOven:
 class APOStage:
     @dataclass
     class TemperatureSetpoint:
-        fahrenheit: int
         celsius: int
 
     @dataclass
@@ -157,17 +154,18 @@ class APOStage:
         top: "APOStage.On"
         rear: "APOStage.On"
 
-    @dataclass(frozen=True)
-    class Fan:
-        speed: int
+    @dataclass
+    class Conditions:
+        conditions: dict[Literal["or"] | Literal["and"], dict[str, any]]
 
     @dataclass(frozen=True)
     class Vent:
-        open: bool
+        state: str
 
     @dataclass(frozen=True)
     class Timer:
         initial: int
+        entry: "APOStage.Conditions"
 
     @dataclass(frozen=True)
     class Probe:
@@ -183,22 +181,27 @@ class APOStage:
         relative_humidity: Setpoint
         steam_percentage: Setpoint
 
+    @dataclass(frozen=True)
+    class Fan:
+        speed: int
+
+    @dataclass(frozen=True)
+    class Action:
+        type: str
+        fan: "APOStage.Fan"
+        heating_elements: "APOStage.HeatingElements"
+        exhaust_vent: "APOStage.Vent"
+        temperature_bulbs: "APOStage.TemperatureBulbs"
+        timer: Optional["APOStage.Timer"] = None
+        steam_generators: Optional["APOStage.SteamGenerators"] = None
+        temperature_probe: Optional["APOStage.Probe"] = None
+
     id: str
+    do: Action
+    exit: Optional["APOStage.Conditions"] 
+    entry: Optional["APOStage.Conditions"] 
     title: str
-    type: str
-    temperature_bulbs: TemperatureBulbs
-    heating_elements: HeatingElements
-    fan: Fan
-    vent: Vent
-    step_type: str = "stage"
-    description: str = ""
-    user_action_required: bool = False
-    rack_position: int = 3
-    steam_generators: SteamGenerators | None = None
-    timer_added: bool = False
-    timer: Timer | None = None
-    probe_added: bool = False
-    temperature_probe: Probe | None = None
+    description: str
 
 
 @dataclass
@@ -212,6 +215,11 @@ class APOCommand(Generic[P]):
     @dataclass
     class APOStartPayload:
         cook_id: str
+        cooker_id: str
+        type: str
+        cookable_type: str
+        origin_source: str
+        title: str
         stages: list[APOStage]
 
     command: str
